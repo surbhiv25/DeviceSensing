@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cognito_identity_pool_id">us-east-2:381488003381</string>
+    <string name="region">us-east-2</string>
+
+    <string name="kinesis_stream_name">agni_mobile_dev</string>
+    <string name="firehose_stream_name">firehose-stream-1</string>
+</resources>

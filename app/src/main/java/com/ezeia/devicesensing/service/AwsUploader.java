@@ -6,6 +6,7 @@ import android.os.Build;
 import android.util.Log;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.auth.AWSCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.CognitoCachingCredentialsProvider;
 import com.amazonaws.mobileconnectors.kinesis.kinesisrecorder.KinesisFirehoseRecorder;
 import com.amazonaws.mobileconnectors.kinesis.kinesisrecorder.KinesisRecorder;
@@ -23,7 +24,8 @@ public class AwsUploader {
     private final Context ctx;
     private KinesisRecorder kinesisRecorder;
     private KinesisFirehoseRecorder firehoseRecorder;
-    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZZZZZ", Locale.ENGLISH);
+
+    //private KinesisProducer kinesisProducer = null;
 
     public AwsUploader(Context ctx) {
 
@@ -37,6 +39,7 @@ public class AwsUploader {
 
         // Get credential from Cognito Identiry Pool
         File directory = ctx.getApplicationContext().getCacheDir();
+        BasicAWSCredentials credentials = new BasicAWSCredentials(ctx.getString(R.string.access_key),ctx.getString(R.string.secret_key));
         AWSCredentialsProvider provider = new CognitoCachingCredentialsProvider(
                 ctx.getApplicationContext(),
                 cognitoIdentityPoolId,
@@ -50,7 +53,6 @@ public class AwsUploader {
     /**
      * Submit a record to Kinesis Stream
      */
-
     public void submitKinesisRecord(JSONObject jsonObject) {
         String kinesisStreamName = ctx.getString(R.string.kinesis_stream_name);
         //JSONObject json = new JSONObject();
@@ -60,16 +62,16 @@ public class AwsUploader {
             json.accumulate("pitch", pitch);
             json.accumulate("roll", roll);
             Log.e("TAG", json.toString());*/
-            kinesisRecorder.saveRecord(jsonObject.toString(), kinesisStreamName);
+        firehoseRecorder.saveRecord(jsonObject.toString(), kinesisStreamName);
             new AsyncTask<Void, Void, Void>() {
                 @Override
                 protected Void doInBackground(Void... v) {
                     try {
-                        kinesisRecorder.submitAllRecords();
+                        firehoseRecorder.submitAllRecords();
                     } catch (AmazonClientException ace) {
                         Log.e("TAG", "kinesis.submitAll failed");
                         Log.e("TAG",ace.getMessage()+"---"+ace.getCause());
-                        initRecorder();
+                        //initRecorder();
                     }
                     return null;
                 }
@@ -85,18 +87,29 @@ public class AwsUploader {
      * @param put_string
      */
     public void saveFirehoseRecord(String put_string) {
-        String firehoseStreamName = ctx.getString(R.string.firehose_stream_name);
-        JSONObject json = new JSONObject();
-        try {
-            json.accumulate("time", sdf.format(new Date()));
+        String firehoseStreamName = ctx.getString(R.string.kinesis_stream_name);
+          /*  json.accumulate("time", sdf.format(new Date()));
             json.accumulate("model", Build.MODEL);
             json.accumulate("message", put_string);
-            Log.e("TAG", json.toString());
-            firehoseRecorder.saveRecord(json.toString(), firehoseStreamName);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+            Log.e("TAG", json.toString());*/
+
+            firehoseRecorder.saveRecord(put_string, firehoseStreamName);
     }
+
+    /*private KinesisProducer getKinesisProducer(){
+        if(kinesisProducer == null){
+
+            KinesisProducerConfiguration config = new KinesisProducerConfiguration();
+            config.setRegion(ctx.getString(R.string.region));
+            BasicAWSCredentials awsCreds = new BasicAWSCredentials(ctx.getString(R.string.access_key),ctx.getString(R.string.secret_key));
+            config.setCredentialsProvider(new AWSStaticCredentialsProvider(awsCreds));
+            config.setMaxConnections(1);
+            config.setRequestTimeout(6000);
+            config.setRecordMaxBufferedTime(5000);
+            kinesisProducer = new KinesisProducer(config);
+        }
+        return kinesisProducer;
+    }*/
 
 
 }

@@ -12,6 +12,7 @@ import android.widget.Toast;
 import com.ezeia.devicesensing.LogsUtil;
 import com.ezeia.devicesensing.SqliteRoom.Database.AppDatabase;
 import com.ezeia.devicesensing.SqliteRoom.utils.DatabaseInitializer;
+import com.ezeia.devicesensing.pref.Preference;
 import com.ezeia.devicesensing.utils.CommonFunctions;
 import com.ezeia.devicesensing.utils.Functions;
 import com.google.gson.JsonObject;
@@ -47,24 +48,30 @@ public class CellTowerStateListener extends PhoneStateListener
             if (signalStrength.getGsmSignalStrength() != 99){
                 signalStrengthValue = signalStrength.getGsmSignalStrength() * 2 - 113;
                 simType = "GSM";
-                createJson("GSM",signalStrengthValue);
+                //createJson("GSM",signalStrengthValue);
             }
             else{
                 signalStrengthValue = signalStrength.getGsmSignalStrength();
                 simType = "GSM";
-                createJson("GSM",signalStrengthValue);
+                //createJson("GSM",signalStrengthValue);
             }
         } else {
             signalStrengthValue = signalStrength.getCdmaDbm();
             simType = "GSM";
-            createJson("CDMA",signalStrengthValue);
+            //createJson("CDMA",signalStrengthValue);
         }
-        Log.i("TAG","Signal Strength : " + signalStrengthValue);
+        //Log.i("TAG","Signal Strength : " + signalStrengthValue);
 
-/*
+        Boolean checkIfPluggedIn = Preference.getInstance(ctx).isCellTowerEmpty();
+        if(checkIfPluggedIn) {
+            Preference.getInstance(ctx).put(Preference.Key.CELL_TOWER_SIM, simType);
+            Preference.getInstance(ctx).put(Preference.Key.CELL_TOWER_VAL, String.valueOf(signalStrengthValue));
+        }
+
+        /*
         TelephonyManager mTelephonyManager = (TelephonyManager) ctx.getSystemService(TELEPHONY_SERVICE);
         mTelephonyManager.listen(CellTowerStateListener.this, PhoneStateListener.LISTEN_NONE);*/
-      /*  final Handler ha=new Handler();
+        /*  final Handler ha=new Handler();
         ha.postDelayed(new Runnable() {
             @Override
             public void run()
@@ -72,22 +79,6 @@ public class CellTowerStateListener extends PhoneStateListener
 
             }
         }, 30000);*/
-
-    }
-
-
-    private void createJson(String simType, int signalStrength){
-
-        JsonObject object = new JsonObject();
-        object.addProperty("sim_type",simType);
-        object.addProperty("signal_strength",signalStrength);
-        object.addProperty("timestamp", CommonFunctions.fetchDateInUTC());
-
-        Functions functions = new Functions(ctx);
-        JsonObject objectLoc = functions.fetchLocation();
-        object.add("location",objectLoc);
-
-        DatabaseInitializer.addData(AppDatabase.getAppDatabase(ctx),"CellTower",object.toString(),CommonFunctions.fetchDateInUTC());
 
     }
 }

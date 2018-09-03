@@ -12,6 +12,7 @@ import com.ezeia.devicesensing.SqliteRoom.utils.DatabaseInitializer;
 import com.ezeia.devicesensing.pref.Preference;
 import com.ezeia.devicesensing.service.ForegroundService;
 import com.ezeia.devicesensing.utils.CommonFunctions;
+import com.ezeia.devicesensing.utils.Functions;
 import com.google.gson.JsonObject;
 
 public class PowerReceiver extends BroadcastReceiver {
@@ -90,6 +91,11 @@ public class PowerReceiver extends BroadcastReceiver {
         JsonObject object = new JsonObject();
         object.addProperty("state",pluggedState);
         object.addProperty("timestamp",CommonFunctions.fetchDateInUTC());
+
+        Functions functions = new Functions(ctx);
+        JsonObject objectLoc = functions.fetchLocation();
+        object.add("location",objectLoc);
+
         DatabaseInitializer.addData(AppDatabase.getAppDatabase(ctx),"BatteryPlug",object.toString(),CommonFunctions.fetchDateInUTC());
     }
 

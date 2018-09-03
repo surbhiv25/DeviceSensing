@@ -35,6 +35,9 @@ public class Preference {
         public static final String ACC_Z = "AccZ";
         public static final String ACCURACY = "Accuracy";
         public static final String ACC_TIMESTAMP = "timestamp";
+
+        public static final String CELL_TOWER_SIM = "cell_tower_sim";
+        public static final String CELL_TOWER_VAL = "cell_tower_strength";
     }
 
     private Preference(Context context) {
@@ -220,7 +223,7 @@ public class Preference {
         return isPackageNameEmpty() ? "" : getString(Key.PACKAGE_NAME);
     }
 
-    private boolean isDeviceInfoEmpty() {
+    public boolean isDeviceInfoEmpty() {
         return getBoolean(Key.IS_DEVICE_INFO);
     }
 
@@ -228,7 +231,7 @@ public class Preference {
         return !isDeviceInfoEmpty() && getBoolean(Key.IS_DEVICE_INFO);
     }
 
-    private boolean isWifiScanEmpty() {
+    public boolean isWifiScanEmpty() {
         return getBoolean(Key.IS_WIFI_SCANNED);
     }
 
@@ -236,39 +239,49 @@ public class Preference {
         return !isWifiScanEmpty() && getBoolean(Key.IS_WIFI_SCANNED);
     }
 
-    private boolean isAccXEmpty() {
+    public boolean isAccXEmpty() {
         return getBoolean(Key.ACC_X);
     }
-
-    public Boolean getAccX() {
-        return !isAccXEmpty() && getBoolean(Key.ACC_X);
+    public String getAccX() {
+        return isAccXEmpty() ? "" : getString(Key.ACC_X);
     }
-    private boolean isAccYEmpty() {
+
+    public boolean isAccYEmpty() {
         return getBoolean(Key.ACC_Y);
     }
-
-    public Boolean getAccY() {
-        return !isAccYEmpty() && getBoolean(Key.ACC_Y);
+    public String getAccY() {
+        return !isAccYEmpty() ? "" : getString(Key.ACC_Y);
     }
-    private boolean isAccZEmpty() {
+
+    public boolean isAccZEmpty() {
         return getBoolean(Key.ACC_Z);
     }
-
-    public Boolean getAccZ() {
-        return !isAccZEmpty() && getBoolean(Key.ACC_Z);
+    public String getAccZ() {
+        return !isAccZEmpty() ? "" : getString(Key.ACC_Z);
     }
-    private boolean isAccuracyEmpty() {
+
+    public boolean isAccuracyEmpty() {
         return getBoolean(Key.ACCURACY);
     }
-
-    public Boolean getAccuracy() {
-        return !isAccuracyEmpty() && getBoolean(Key.ACCURACY);
+    public String getAccuracy() {
+        return !isAccuracyEmpty() ? "" : getString(Key.ACCURACY);
     }
-    private boolean isTimestampEmpty() {
+
+    public boolean isTimestampEmpty() {
         return getBoolean(Key.ACC_TIMESTAMP);
     }
+    public String getAccTimestamp() {
+        return !isTimestampEmpty() ? "" : getString(Key.ACC_TIMESTAMP); }
 
-    public Boolean getAccTimestamp() {
-        return !isTimestampEmpty() && getBoolean(Key.ACC_TIMESTAMP);
+    public boolean isCellTowerEmpty() {
+        return TextUtils.isEmpty(getString(Key.CELL_TOWER_SIM));
     }
+    public String getCellTower() {
+        return isCellTowerEmpty() ? "" : getString(Key.CELL_TOWER_SIM);
+    }
+
+    public String getCellTowerStrength() {
+        return isCellTowerEmpty() ? "" : getString(Key.CELL_TOWER_VAL);
+    }
+
 }

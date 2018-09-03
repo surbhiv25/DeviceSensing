@@ -37,7 +37,7 @@ public class WifiReceiver extends BroadcastReceiver {
                 break;
 
             case WifiManager.WIFI_STATE_ENABLING:
-                Toast.makeText(context,"wifi enabling", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(context,"wifi enabling", Toast.LENGTH_SHORT).show();
                 break;
 
             case WifiManager.WIFI_STATE_DISABLED:
@@ -50,11 +50,11 @@ public class WifiReceiver extends BroadcastReceiver {
                 break;
 
             case WifiManager.WIFI_STATE_DISABLING:
-                Toast.makeText(context,"wifi disabling", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(context,"wifi disabling", Toast.LENGTH_SHORT).show();
                 break;
 
             case WifiManager.WIFI_STATE_UNKNOWN:
-                Toast.makeText(context,"wifi unknown", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(context,"wifi unknown", Toast.LENGTH_SHORT).show();
                 break;
         }
     }

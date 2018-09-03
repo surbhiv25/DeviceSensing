@@ -41,7 +41,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         fillStats();
-
         //LogsUtil.readLogs();
     }
 
@@ -51,7 +50,6 @@ public class MainActivity extends AppCompatActivity {
 
             if (!checkPermissionExtra()) {
                 requestPermissionExtra();
-
             } else {
                 Intent startIntent = new Intent(MainActivity.this, ForegroundService.class);
                 startIntent.setAction(Constants.ACTION.STARTFOREGROUND_ACTION);
@@ -76,18 +74,17 @@ public class MainActivity extends AppCompatActivity {
         int resultPhoneState = ContextCompat.checkSelfPermission(getApplicationContext(), READ_PHONE_STATE);
         int resultLoc = ContextCompat.checkSelfPermission(getApplicationContext(), ACCESS_FINE_LOCATION);
         int resultStorage = ContextCompat.checkSelfPermission(getApplicationContext(), WRITE_EXTERNAL_STORAGE);
-        int resultCamera = ContextCompat.checkSelfPermission(getApplicationContext(), CAMERA);
+        //int resultCamera = ContextCompat.checkSelfPermission(getApplicationContext(), CAMERA);
 
         return resultSms == PackageManager.PERMISSION_GRANTED && resultCall == PackageManager.PERMISSION_GRANTED
                 && resultContact == PackageManager.PERMISSION_GRANTED && resultPhoneState == PackageManager.PERMISSION_GRANTED
-                &&  resultLoc == PackageManager.PERMISSION_GRANTED && resultStorage == PackageManager.PERMISSION_GRANTED
-                &&  resultCamera == PackageManager.PERMISSION_GRANTED;
+                &&  resultLoc == PackageManager.PERMISSION_GRANTED && resultStorage == PackageManager.PERMISSION_GRANTED;
     }
 
     private void requestPermissionExtra() {
 
         ActivityCompat.requestPermissions(this, new String[]{READ_SMS,READ_CALL_LOG,READ_CONTACTS,
-                READ_PHONE_STATE,ACCESS_FINE_LOCATION, WRITE_EXTERNAL_STORAGE, CAMERA}, PERMISSION_REQUEST_CODE);
+                READ_PHONE_STATE,ACCESS_FINE_LOCATION, WRITE_EXTERNAL_STORAGE}, PERMISSION_REQUEST_CODE);
 
     }
 
@@ -104,11 +101,10 @@ public class MainActivity extends AppCompatActivity {
                     boolean phoneAccepted = grantResults[3] == PackageManager.PERMISSION_GRANTED;
                     boolean locationAccepted = grantResults[4] == PackageManager.PERMISSION_GRANTED;
                     boolean storageAccepted = grantResults[5] == PackageManager.PERMISSION_GRANTED;
-                    boolean cameraAccepted = grantResults[6] == PackageManager.PERMISSION_GRANTED;
+                    //boolean cameraAccepted = grantResults[6] == PackageManager.PERMISSION_GRANTED;
 
                     if (smsAccepted && callLogAccepted && contactsAccepted && phoneAccepted
-                            && locationAccepted && storageAccepted && cameraAccepted) {
-                        Toast.makeText(getApplicationContext(), "Permission Granted.", Toast.LENGTH_SHORT).show();
+                            && locationAccepted && storageAccepted ) {
                         Intent startIntent = new Intent(MainActivity.this, ForegroundService.class);
                         startIntent.setAction(Constants.ACTION.STARTFOREGROUND_ACTION);
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
@@ -121,8 +117,6 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                     else {
-                        Toast.makeText(getApplicationContext(),"Permission Denied.",Toast.LENGTH_SHORT).show();
-
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                             if (shouldShowRequestPermissionRationale(ACCESS_FINE_LOCATION)) {
                                 showMessageOKCancel(
@@ -130,9 +124,8 @@ public class MainActivity extends AppCompatActivity {
                                             @TargetApi(Build.VERSION_CODES.M)
                                             @Override
                                             public void onClick(DialogInterface dialog, int which) {
-                                                    requestPermissions(new String[]{READ_SMS,READ_CALL_LOG,READ_CONTACTS,
-                                                                    READ_PHONE_STATE,ACCESS_FINE_LOCATION, WRITE_EXTERNAL_STORAGE,
-                                                            CAMERA}, PERMISSION_REQUEST_CODE);
+                                                requestPermissions(new String[]{READ_SMS,READ_CALL_LOG,READ_CONTACTS,
+                                                                READ_PHONE_STATE,ACCESS_FINE_LOCATION, WRITE_EXTERNAL_STORAGE}, PERMISSION_REQUEST_CODE);
                                             }
                                         });
                                 return;
@@ -146,16 +139,15 @@ public class MainActivity extends AppCompatActivity {
 
     private void showMessageOKCancel(DialogInterface.OnClickListener okListener) {
         new AlertDialog.Builder(this)
-                .setMessage("You need to allow access to all the permissions")
-                .setPositiveButton("OK", okListener)
-                .setNegativeButton("Cancel", null)
+                .setMessage(R.string.allowPermission)
+                .setPositiveButton(R.string.okButton, okListener)
+                .setNegativeButton(R.string.cancelButton, null)
                 .create()
                 .show();
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Log.d("MainActivity", "resultCode " + resultCode);
         switch (requestCode){
             case MY_PERMISSIONS_REQUEST_PACKAGE_USAGE_STATS:
                 fillStats();
@@ -164,7 +156,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void requestPermission() {
-        Toast.makeText(this, "Need to request permission", Toast.LENGTH_SHORT).show();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             startActivityForResult(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS), MY_PERMISSIONS_REQUEST_PACKAGE_USAGE_STATS);
         }
@@ -176,7 +167,7 @@ public class MainActivity extends AppCompatActivity {
                 getSystemService(Context.APP_OPS_SERVICE);
         int mode = 0;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-            mode = appOps.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS,
+            if(appOps != null) mode = appOps.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS,
                     android.os.Process.myUid(), getPackageName());
         }
         return mode == AppOpsManager.MODE_ALLOWED;

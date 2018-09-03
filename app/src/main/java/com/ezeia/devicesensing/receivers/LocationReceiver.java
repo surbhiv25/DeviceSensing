@@ -46,9 +46,9 @@ public class LocationReceiver extends BroadcastReceiver {
         LocationManager locationManager = (LocationManager) context.getSystemService(LOCATION_SERVICE);
 
         // getting network status
-        Boolean isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+        //Boolean isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
         Boolean isGPSEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-        if (!isGPSEnabled && !isNetworkEnabled) {
+        if (!isGPSEnabled) {
             return false;
         }else{
             return true;

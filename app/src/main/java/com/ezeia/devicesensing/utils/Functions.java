@@ -47,7 +47,7 @@ public class Functions
         this.ctx = ctx;
     }
 
-    //done
+    //getting called in collectedUponChange()
     public void primaryKeyData()
     {
         String IMEI =  CommonFunctions.getDeviceID(ctx);
@@ -58,7 +58,7 @@ public class Functions
         JsonObject object = new JsonObject();
         object.addProperty("IMEI",IMEI);
         object.addProperty("Device_SerialID",DeviceSerialID);
-        DatabaseInitializer.addData(AppDatabase.getAppDatabase(ctx),"PrimaryData",object.toString(), CommonFunctions.fetchDateInUTC());
+        //DatabaseInitializer.addData(AppDatabase.getAppDatabase(ctx),"PrimaryData",object.toString(), CommonFunctions.fetchDateInUTC());
     }
 
     //done
@@ -209,6 +209,36 @@ public class Functions
         return object;
     }
 
+    public void createJSon(String x, String y, String z, String acc){
+
+        Functions functions = new Functions(ctx);
+        JsonObject objectLoc = functions.fetchLocation();
+
+        JsonObject object = new JsonObject();
+        object.addProperty("X",x);
+        object.addProperty("Y",y);
+        object.addProperty("Z",z);
+        object.addProperty("Accuracy",acc);
+        object.addProperty("timestamp",CommonFunctions.fetchDateInUTC());
+        object.add("location",objectLoc);
+        DatabaseInitializer.addData(AppDatabase.getAppDatabase(ctx),"Sensor",object.toString(),CommonFunctions.fetchDateInUTC());
+    }
+
+    private void createJsonTower(String simType, String signalStrength){
+
+        JsonObject object = new JsonObject();
+        object.addProperty("sim_type",simType);
+        object.addProperty("signal_strength",signalStrength);
+        object.addProperty("timestamp", CommonFunctions.fetchDateInUTC());
+
+        Functions functions = new Functions(ctx);
+        JsonObject objectLoc = functions.fetchLocation();
+        object.add("location",objectLoc);
+
+        DatabaseInitializer.addData(AppDatabase.getAppDatabase(ctx),"CellTower",object.toString(),CommonFunctions.fetchDateInUTC());
+
+    }
+
     public void collectedWithReport()
     {
         // 1. Memory usage
@@ -216,24 +246,62 @@ public class Functions
         // 3. cpu utilization (add)
         // 4. time
 
-     /*   Timer t = new Timer();
+        TelephonyManager mTelephonyManager = (TelephonyManager) ctx.getSystemService(TELEPHONY_SERVICE);
+        mTelephonyManager.listen(new CellTowerStateListener(ctx), PhoneStateListener.LISTEN_SIGNAL_STRENGTHS);
+
+        final Handler handler = new Handler();
+        Timer t = new Timer();
         t.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                    TelephonyManager mTelephonyManager = (TelephonyManager) ctx.getSystemService(TELEPHONY_SERVICE);
-                    mTelephonyManager.listen(new CellTowerStateListener(ctx), PhoneStateListener.LISTEN_SIGNAL_STRENGTHS);
+                handler.post(new Runnable() {
+                    public void run() {
+                        if(Preference.getInstance(ctx) != null){
+                            String strength = "", xAcc = "", yAcc = "", zAcc = "", accuracy = "", timestamp = "";
+                            String simType = Preference.getInstance(ctx).getCellTower();
+                            if(Preference.getInstance(ctx).getCellTowerStrength() != null){
+                                strength = Preference.getInstance(ctx).getCellTowerStrength();
+                            }
+                            Log.i("TAG","Tower Strength..."+CommonFunctions.fetchDateInUTC());
+                            createJsonTower(simType,strength);
+
+                         /*   if(Preference.getInstance(ctx).getAccX() != null){
+                                xAcc = Preference.getInstance(ctx).getAccX();
+                            }
+                            if(Preference.getInstance(ctx).getAccX() != null){
+                                yAcc = Preference.getInstance(ctx).getAccY();
+                            }
+                            if(Preference.getInstance(ctx).getAccX() != null){
+                                zAcc = Preference.getInstance(ctx).getAccZ();
+                            }
+                            if(Preference.getInstance(ctx).getAccX() != null){
+                                accuracy = Preference.getInstance(ctx).getAccuracy();
+                            }
+
+                            createJSon(xAcc,yAcc,zAcc,accuracy);*/
+                        }
+                    }
+                });
             }
-        }, 0, 30000);*/
-        final Handler ha=new Handler();
+        }, 0, 60000);
+
+        /*final Handler ha=new Handler();
         ha.postDelayed(new Runnable() {
             @Override
             public void run()
             {
-                TelephonyManager mTelephonyManager = (TelephonyManager) ctx.getSystemService(TELEPHONY_SERVICE);
-                mTelephonyManager.listen(new CellTowerStateListener(ctx), PhoneStateListener.LISTEN_SIGNAL_STRENGTHS);
+                if(Preference.getInstance(ctx) != null){
+                   String strength = "";
+                   String simType = Preference.getInstance(ctx).getCellTower();
+                   if(Preference.getInstance(ctx).getCellTowerStrength() != null){
+                       strength = Preference.getInstance(ctx).getCellTowerStrength();
+                   }
+                   Log.i("TAG","Tower Strength..."+CommonFunctions.fetchDateInUTC());
+                   CellTowerStateListener.createJson(ctx,simType,strength);
+                   ha.postDelayed(this, 30000);
+                }
             }
-        }, 30000);
-
+        }, 30000);*/
 
         long totalRamValue = CommonFunctions.totalRamMemorySize(ctx);
         long freeRamValue = CommonFunctions.freeRamMemorySize(ctx);

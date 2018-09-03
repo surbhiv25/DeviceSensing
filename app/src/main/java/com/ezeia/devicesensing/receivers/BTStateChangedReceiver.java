@@ -84,7 +84,7 @@ public class BTStateChangedReceiver extends BroadcastReceiver {
                 break;
 
             case BluetoothAdapter.STATE_CONNECTING:
-                Toast.makeText(context, "BTStateChangedBroadcastReceiver: STATE_CONNECTING", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(context, "BTStateChangedBroadcastReceiver: STATE_CONNECTING", Toast.LENGTH_SHORT).show();
                 break;
 
             case BluetoothAdapter.STATE_DISCONNECTED:
@@ -96,7 +96,7 @@ public class BTStateChangedReceiver extends BroadcastReceiver {
                 break;
 
             case BluetoothAdapter.STATE_DISCONNECTING:
-                Toast.makeText(context, "BTStateChangedBroadcastReceiver: STATE_DISCONNECTING", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(context, "BTStateChangedBroadcastReceiver: STATE_DISCONNECTING", Toast.LENGTH_SHORT).show();
                 break;
 
             case BluetoothAdapter.STATE_OFF: {
@@ -157,11 +157,11 @@ public class BTStateChangedReceiver extends BroadcastReceiver {
                 break;
 
             case BluetoothAdapter.STATE_TURNING_OFF:
-                Toast.makeText(context, "BTStateChangedBroadcastReceiver: STATE_TURNING_OFF", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(context, "BTStateChangedBroadcastReceiver: STATE_TURNING_OFF", Toast.LENGTH_SHORT).show();
                 break;
 
             case BluetoothAdapter.STATE_TURNING_ON:
-                Toast.makeText(context, "BTStateChangedBroadcastReceiver: STATE_TURNING_ON", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(context, "BTStateChangedBroadcastReceiver: STATE_TURNING_ON", Toast.LENGTH_SHORT).show();
                 break;
         }
     }

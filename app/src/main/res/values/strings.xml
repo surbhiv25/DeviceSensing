@@ -3,4 +3,7 @@
 
     <string name="service_started">SERVICE STARTED</string>
     <string name="service_running">SERVICE RUNNING</string>
+    <string name="allowPermission">You need to allow access to all the permissions</string>
+    <string name="okButton">OK</string>
+    <string name="cancelButton">Cancel</string>
 </resources>

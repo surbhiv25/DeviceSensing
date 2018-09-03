@@ -16,6 +16,8 @@ import android.util.Log;
 
 import com.ezeia.devicesensing.utils.CommonFunctions;
 
+import java.util.List;
+
 
 public class GPSTracker extends Service implements LocationListener {
 
@@ -145,8 +147,7 @@ public class GPSTracker extends Service implements LocationListener {
             locationManager = (LocationManager) mContext.getSystemService(LOCATION_SERVICE);
 
             // getting GPS status
-            //isGPSEnabled = locationManager
-            //.isProviderEnabled(LocationManager.GPS_PROVIDER);
+            isGPSEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
 
             // getting network status
             isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
@@ -163,7 +164,7 @@ public class GPSTracker extends Service implements LocationListener {
                             MIN_TIME_BW_UPDATES,
                             MIN_DISTANCE_CHANGE_FOR_UPDATES, GPSTracker.this);
 
-                    Log.d("Network", "Network");
+                    //Log.d("Network", "Network");
                     if (locationManager != null) {
                         location = locationManager
                                 .getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
@@ -183,7 +184,28 @@ public class GPSTracker extends Service implements LocationListener {
                             provider = location.getProvider();
                             elapsedTime = location.getElapsedRealtimeNanos();
                             timestamp = CommonFunctions.fetchDateInUTC();
-                        }
+                        }/*else{
+                            List<String> providers = locationManager.getProviders(true);
+                            Location bestLocation = null;
+                            for (String provider : providers) {
+                                Location l = locationManager.getLastKnownLocation(provider);
+                                //Log.i("TAG","PROVIDER..."+l.getLatitude()+"--"+l.getLongitude());
+
+                                if (l == null) {
+                                    continue;
+                                }
+                                if (bestLocation == null
+                                        || l.getAccuracy() < bestLocation.getAccuracy()) {
+                                    //Log.i("TAG","PROVIDER..."+l.getLatitude()+"--"+l.getLongitude());
+                                    latitude = bestLocation.getLatitude();
+                                    longitude = bestLocation.getLongitude();
+                                    bestLocation = l;
+                                }
+                            }
+                            if (location == null) {
+                                return null;
+                            }
+                        }*/
                     }
                 }
                 // if GPS Enabled get lat/long using GPS Services
@@ -195,7 +217,7 @@ public class GPSTracker extends Service implements LocationListener {
                                     LocationManager.GPS_PROVIDER,
                                     MIN_TIME_BW_UPDATES,
                                     MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
-                            Log.d("GPS Enabled", "GPS Enabled");
+                            //Log.d("GPS Enabled", "GPS Enabled");
                             if (locationManager != null) {
                                 location = locationManager
                                         .getLastKnownLocation(LocationManager.GPS_PROVIDER);
@@ -310,6 +332,8 @@ public class GPSTracker extends Service implements LocationListener {
 
     @Override
     public void onLocationChanged(Location location) {
+        location.getLatitude();
+        location.getLongitude();
     }
 
     @Override

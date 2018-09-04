@@ -38,6 +38,8 @@ public class Preference {
 
         public static final String CELL_TOWER_SIM = "cell_tower_sim";
         public static final String CELL_TOWER_VAL = "cell_tower_strength";
+
+        public static final String FIRST_REPORT = "first_report";
     }
 
     private Preference(Context context) {
@@ -282,6 +284,13 @@ public class Preference {
 
     public String getCellTowerStrength() {
         return isCellTowerEmpty() ? "" : getString(Key.CELL_TOWER_VAL);
+    }
+
+    public boolean isFirstReportEmpty() {
+        return TextUtils.isEmpty(getString(Key.FIRST_REPORT));
+    }
+    public String getFirstReportDate() {
+        return isFirstReportEmpty() ? "" : getString(Key.FIRST_REPORT);
     }
 
 }

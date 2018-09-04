@@ -72,6 +72,34 @@ public class ScreenReceiver extends BroadcastReceiver {
         Functions func = new Functions(ctx);
         func.collectedWithReport();
 
+        if(Preference.getInstance(ctx) != null) {
+            Boolean checkIfPluggedIn = Preference.getInstance(ctx).isFirstReportEmpty();
+            if (checkIfPluggedIn) { //first report after app install
+                if (CommonFunctions.fetchTodayDate() != null) {
+                    String todayDate = CommonFunctions.fetchTodayDate();
+                    Preference.getInstance(ctx).put(Preference.Key.FIRST_REPORT, todayDate);
+                    allProbes();
+                    Log.i("FINAL JSON..", "first report");
+                }
+            } else {
+                String getTodayDate = Preference.getInstance(ctx).getFirstReportDate();
+                String todayDate = CommonFunctions.fetchTodayDate();
+                if (getTodayDate.equals(todayDate)) {
+                    selectedProbes();
+                    Log.i("FINAL JSON..", "same date");
+                } else {
+                    if (todayDate != null) {
+                        Preference.getInstance(ctx).put(Preference.Key.FIRST_REPORT, todayDate);
+                        allProbes();
+                        Log.i("FINAL JSON..", "Different report");
+                    }
+                }
+            }
+        }
+    }
+
+    private void allProbes(){
+
         JSONObject object = new JSONObject();
         try {
             JSONObject jsonObjectDevice = DatabaseInitializer.fetchJsonData(AppDatabase.getAppDatabase(ctx),"DeviceInfo");
@@ -131,6 +159,60 @@ public class ScreenReceiver extends BroadcastReceiver {
             JSONObject finalObject = DatabaseInitializer.fetchJsonData(AppDatabase.getAppDatabase(ctx),"FINAL_JSON");
 
             //AwsUploader uploader = new AwsUploader(ctx);
+            //uploader.submitKinesisRecord(finalObject);
+
+            Log.i("FINAL JSON..",finalObject.toString());
+            int maxLogSize = 1000;
+            for(int i = 0; i <= finalObject.toString().length() / maxLogSize; i++) {
+                int start = i * maxLogSize;
+                int end = (i+1) * maxLogSize;
+                end = end > finalObject.toString().length() ? finalObject.toString().length() : end;
+                Log.i("SUBSTRING JSON", finalObject.toString().substring(start, end));
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void selectedProbes(){
+
+        JSONObject object = new JSONObject();
+        try {
+            JSONArray jsonObjectInstall = DatabaseInitializer.fetchJsonArray(AppDatabase.getAppDatabase(ctx),"Install");
+            JSONArray jsonObjectUninstall = DatabaseInitializer.fetchJsonArray(AppDatabase.getAppDatabase(ctx),"UnInstall");
+            JSONArray jsonObjectUsage = DatabaseInitializer.fetchJsonArray(AppDatabase.getAppDatabase(ctx),"AppUsage");
+            JSONArray jsonObjectSensor = DatabaseInitializer.fetchJsonArray(AppDatabase.getAppDatabase(ctx),"Sensor");
+            JSONArray jsonObjBTState = DatabaseInitializer.fetchJsonArray(AppDatabase.getAppDatabase(ctx),"Bluetooth_State");
+            JSONArray jsonObjBTConn = DatabaseInitializer.fetchJsonArray(AppDatabase.getAppDatabase(ctx),"Bluetooth_Connection");
+            JSONObject jsonObjectWifi = DatabaseInitializer.fetchJsonData(AppDatabase.getAppDatabase(ctx),"WifiConnection");
+            JSONArray jsonObjectAirplane = DatabaseInitializer.fetchJsonArray(AppDatabase.getAppDatabase(ctx),"Airplane");
+            JSONArray jsonObjCellTower = DatabaseInitializer.fetchJsonArray(AppDatabase.getAppDatabase(ctx),"CellTower");
+            JSONArray jsonObjLocation = DatabaseInitializer.fetchJsonArray(AppDatabase.getAppDatabase(ctx),"Location");
+            JSONArray jsonObjBatteryPlug = DatabaseInitializer.fetchJsonArray(AppDatabase.getAppDatabase(ctx),"BatteryPlug");
+            JSONObject jsonObjBattery = DatabaseInitializer.fetchJsonData(AppDatabase.getAppDatabase(ctx),"Battery");
+
+            if(CommonFunctions.getDeviceID(ctx) != null){
+                object.put("IMEI", CommonFunctions.getDeviceID(ctx));
+            }
+            object.put("Install",jsonObjectInstall);
+            object.put("UnInstall",jsonObjectUninstall);
+            object.put("AppUsage",jsonObjectUsage);
+            object.put("Sensor_accelerometer",jsonObjectSensor);
+            object.put("Bluetooth_State",jsonObjBTState);
+            object.put("Bluetooth_Connection",jsonObjBTConn);
+            object.put("Wifi_State",jsonObjectWifi);
+            object.put("Airplane_Mode",jsonObjectAirplane);
+            object.put("CellTower",jsonObjCellTower);
+            object.put("Location",jsonObjLocation);
+            object.put("Battery_Charging_State",jsonObjBatteryPlug);
+            object.put("Battery",jsonObjBattery);
+
+            DatabaseInitializer.deleteProbe(AppDatabase.getAppDatabase(ctx),"FINAL_JSON");
+            DatabaseInitializer.addData(AppDatabase.getAppDatabase(ctx),"FINAL_JSON",object.toString(),CommonFunctions.fetchDateInUTC());
+
+            JSONObject finalObject = DatabaseInitializer.fetchJsonData(AppDatabase.getAppDatabase(ctx),"FINAL_JSON");
+
+           // AwsUploader uploader = new AwsUploader(ctx);
             //uploader.submitKinesisRecord(finalObject);
 
             Log.i("FINAL JSON..",finalObject.toString());

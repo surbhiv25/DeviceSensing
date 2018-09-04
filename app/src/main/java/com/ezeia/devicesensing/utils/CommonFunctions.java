@@ -697,14 +697,9 @@ public class CommonFunctions {
         return format.format(date);
     }
 
-    public static String addTime(String fetchedDate) throws ParseException {
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS",Locale.ENGLISH);
-        Date date = df.parse(fetchedDate);
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(date);
-        cal.add(Calendar.SECOND, 30);
-        date = cal.getTime();
-
+    public static String fetchTodayDate() {
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd",Locale.ENGLISH);
+        Date date = new Date();
         return df.format(date);
     }
 

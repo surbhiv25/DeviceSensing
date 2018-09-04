@@ -92,7 +92,6 @@ public class ForegroundService extends Service implements SensorEventListener {
     private Long  tempTimestamp;
     private Long accTimestamp;
     private int checkSensor = 0;
-    private Boolean checkSensorVal = false;
     private Boolean isIntervalDone = false;
 
     @Override
@@ -519,31 +518,5 @@ public class ForegroundService extends Service implements SensorEventListener {
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int i) { }
-
-    private void printValue()
-    {
-        if(checkSensor == 1)
-        {
-            Log.i(LOG_TAG,"TEMPERATURE: "+temperature+"\nACCURACY: "+tempAccuracy+
-                    "\nTIMESTAMP: "+tempTimestamp);
-        }
-        else if(checkSensor == 2)
-        {
-            checkSensorVal = true;
-            Log.i("TAG","X: "+x+"\nY: "+y+"\nZ: "+z+"\nACCURACY: "+accAccuracy+ "\nTIMESTAMP: "+CommonFunctions.fetchDateInUTC());
-
-            if(Preference.getInstance(this) != null)
-            {
-                Preference.getInstance(this).put(String.valueOf(x),Preference.Key.ACC_X);
-                Preference.getInstance(this).put(String.valueOf(y),Preference.Key.ACC_Y);
-                Preference.getInstance(this).put(String.valueOf(z),Preference.Key.ACC_Z);
-                Preference.getInstance(this).put(String.valueOf(accAccuracy),Preference.Key.ACCURACY);
-                Preference.getInstance(this).put(String.valueOf(accTimestamp),Preference.Key.ACC_TIMESTAMP);
-            }
-
-            Functions func = new Functions(this);
-            func.createJSon(String.valueOf(x),String.valueOf(y),String.valueOf(z),String.valueOf(accAccuracy));
-        }
-    }
 
 }

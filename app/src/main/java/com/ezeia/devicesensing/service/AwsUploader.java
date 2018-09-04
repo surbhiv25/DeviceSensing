@@ -12,6 +12,9 @@ import com.amazonaws.mobileconnectors.kinesis.kinesisrecorder.KinesisFirehoseRec
 import com.amazonaws.mobileconnectors.kinesis.kinesisrecorder.KinesisRecorder;
 import com.amazonaws.regions.Regions;
 import com.ezeia.devicesensing.R;
+import com.ezeia.devicesensing.SqliteRoom.Database.AppDatabase;
+import com.ezeia.devicesensing.SqliteRoom.utils.DatabaseInitializer;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.io.File;
@@ -55,13 +58,6 @@ public class AwsUploader {
      */
     public void submitKinesisRecord(JSONObject jsonObject) {
         String kinesisStreamName = ctx.getString(R.string.kinesis_stream_name);
-        //JSONObject json = new JSONObject();
-        //try {
-          /*  json.accumulate("time", sdf.format(new Date()));
-            json.accumulate("azimuth", azimuth);
-            json.accumulate("pitch", pitch);
-            json.accumulate("roll", roll);
-            Log.e("TAG", json.toString());*/
         firehoseRecorder.saveRecord(jsonObject.toString(), kinesisStreamName);
             new AsyncTask<Void, Void, Void>() {
                 @Override
@@ -74,6 +70,12 @@ public class AwsUploader {
                         //initRecorder();
                     }
                     return null;
+                }
+
+                @Override
+                protected void onPostExecute(Void aVoid) {
+                    super.onPostExecute(aVoid);
+                    DatabaseInitializer.deleteProbe(AppDatabase.getAppDatabase(ctx),"FINAL_JSON");
                 }
             }.execute();
        /* } catch (JSONException e) {

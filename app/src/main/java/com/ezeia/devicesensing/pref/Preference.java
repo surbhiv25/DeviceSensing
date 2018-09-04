@@ -240,28 +240,28 @@ public class Preference {
     }
 
     public boolean isAccXEmpty() {
-        return getBoolean(Key.ACC_X);
+        return TextUtils.isEmpty(getString(Key.ACC_X));
     }
     public String getAccX() {
         return isAccXEmpty() ? "" : getString(Key.ACC_X);
     }
 
     public boolean isAccYEmpty() {
-        return getBoolean(Key.ACC_Y);
+        return TextUtils.isEmpty(getString(Key.ACC_Y));
     }
     public String getAccY() {
         return !isAccYEmpty() ? "" : getString(Key.ACC_Y);
     }
 
     public boolean isAccZEmpty() {
-        return getBoolean(Key.ACC_Z);
+        return TextUtils.isEmpty(getString(Key.ACC_Z));
     }
     public String getAccZ() {
         return !isAccZEmpty() ? "" : getString(Key.ACC_Z);
     }
 
     public boolean isAccuracyEmpty() {
-        return getBoolean(Key.ACCURACY);
+        return TextUtils.isEmpty(getString(Key.ACCURACY));
     }
     public String getAccuracy() {
         return !isAccuracyEmpty() ? "" : getString(Key.ACCURACY);

@@ -51,14 +51,10 @@ public class Functions
     public void primaryKeyData()
     {
         String IMEI =  CommonFunctions.getDeviceID(ctx);
-        String DeviceSerialID = CommonFunctions.getDeviceSerialID();
-        Log.i(TAG,"IMEI: "+IMEI);
-        Log.i(TAG,"DEVICE SERIAL ID: "+DeviceSerialID);
 
         JsonObject object = new JsonObject();
         object.addProperty("IMEI",IMEI);
-        object.addProperty("Device_SerialID",DeviceSerialID);
-        //DatabaseInitializer.addData(AppDatabase.getAppDatabase(ctx),"PrimaryData",object.toString(), CommonFunctions.fetchDateInUTC());
+        DatabaseInitializer.addData(AppDatabase.getAppDatabase(ctx),"IMEI",object.toString(), CommonFunctions.fetchDateInUTC());
     }
 
     //done

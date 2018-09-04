@@ -98,6 +98,9 @@ public class ScreenReceiver extends BroadcastReceiver {
             JSONObject jsonObjInternal = DatabaseInitializer.fetchJsonData(AppDatabase.getAppDatabase(ctx),"Internal");
             JSONObject jsonObjExternal = DatabaseInitializer.fetchJsonData(AppDatabase.getAppDatabase(ctx),"External");
 
+            if(CommonFunctions.getDeviceID(ctx) != null){
+                object.put("IMEI", CommonFunctions.getDeviceID(ctx));
+            }
             object.put("DeviceInfo",jsonObjectDevice);
             object.put("Install",jsonObjectInstall);
             object.put("UnInstall",jsonObjectUninstall);

@@ -93,6 +93,7 @@ public class ForegroundService extends Service implements SensorEventListener {
     private Long accTimestamp;
     private int checkSensor = 0;
     private Boolean checkSensorVal = false;
+    private Boolean isIntervalDone = false;
 
     @Override
     public void onCreate() {
@@ -238,6 +239,38 @@ public class ForegroundService extends Service implements SensorEventListener {
         {
             Sensor mAccelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
             mSensorController.registerListener(ForegroundService.this, mAccelerometer);
+
+            final Handler handler = new Handler();
+            Timer t = new Timer();
+            t.scheduleAtFixedRate(new TimerTask() {
+                @Override
+                public void run() {
+                    handler.post(new Runnable() {
+                        public void run() {
+
+                            isIntervalDone = true;
+                            String xAcc = "",yAcc ="", zAcc = "", accuracy ="";
+                            if(Preference.getInstance(ctx) != null){
+                               if(Preference.getInstance(ctx).getAccX() != null){
+                                    xAcc = Preference.getInstance(ctx).getAccX();
+                                }
+                                if(Preference.getInstance(ctx).getAccY() != null){
+                                    yAcc = Preference.getInstance(ctx).getAccY();
+                                }
+                                if(Preference.getInstance(ctx).getAccZ() != null){
+                                    zAcc = Preference.getInstance(ctx).getAccZ();
+                                }
+                                if(Preference.getInstance(ctx).getAccuracy() != null){
+                                    accuracy = Preference.getInstance(ctx).getAccuracy();
+                                }
+                                Log.i("TAG","SENSOR GET..."+xAcc+"--"+yAcc+"--"+zAcc+"--"+accuracy);
+                                Functions func = new Functions(ctx);
+                                func.createJSon(xAcc,yAcc,zAcc,accuracy);
+                            }
+                        }
+                    });
+                }
+            }, 0, 60000);
 
             SensorType sensorType = mSensorTypes.get(0);
             AbstractSensorModel sensorModel = AbstractSensorModel.getSensorModelByType(sensorType,ctx);
@@ -418,6 +451,8 @@ public class ForegroundService extends Service implements SensorEventListener {
     @Override
     public void onDestroy() {
         super.onDestroy();
+
+        Toast.makeText(getApplicationContext(),"App Destroyed",Toast.LENGTH_SHORT).show();
         Log.i(LOG_TAG, "In onDestroy");
         unregisterReceiver(bluetoothReceiver);
         unregisterReceiver(wifiReceiver);
@@ -455,7 +490,7 @@ public class ForegroundService extends Service implements SensorEventListener {
             accTimestamp = sensorEvent.timestamp;
             checkSensor = 2;
 
-            final Handler ha=new Handler();
+            /*final Handler ha=new Handler();
             ha.postDelayed(new Runnable() {
 
                 @Override
@@ -465,19 +500,20 @@ public class ForegroundService extends Service implements SensorEventListener {
                         printValue();
                     ha.postDelayed(this,60000);
                 }
-            }, 60000);
+            }, 60000);*/
 
-           //Log.i("TAG","SENSOR VAL: "+x+"--"+y+"--"+z+"--"+accAccuracy);
-
-           /* if(Preference.getInstance(this) != null)
-            {
-                Preference.getInstance(this).put(String.valueOf(x),Preference.Key.ACC_X);
-                Preference.getInstance(this).put(String.valueOf(y),Preference.Key.ACC_Y);
-                Preference.getInstance(this).put(String.valueOf(z),Preference.Key.ACC_Z);
-                Preference.getInstance(this).put(String.valueOf(accAccuracy),Preference.Key.ACCURACY);
-                Preference.getInstance(this).put(String.valueOf(accTimestamp),Preference.Key.ACC_TIMESTAMP);
-            }*/
-
+            if(isIntervalDone){
+                if(Preference.getInstance(this) != null)
+                {
+                    isIntervalDone = false;
+                    Preference.getInstance(this).put(Preference.Key.ACC_X,String.valueOf(x));
+                    Preference.getInstance(this).put(Preference.Key.ACC_Y,String.valueOf(y));
+                    Preference.getInstance(this).put(Preference.Key.ACC_Z,String.valueOf(z));
+                    Preference.getInstance(this).put(Preference.Key.ACCURACY,String.valueOf(accAccuracy));
+                    //Preference.getInstance(this).put(String.valueOf(accTimestamp),Preference.Key.ACC_TIMESTAMP);
+                    Log.i("TAG","SENSOR VAL: "+x+"--"+y+"--"+z+"--"+accAccuracy);
+                }
+            }
         }
     }
 

@@ -461,7 +461,8 @@ public class CommonFunctions {
 
                 JsonObject person = new JsonObject();
                 person.addProperty("Address",objSms.getAddress());
-                person.addProperty("Body",objSms.getMsg());
+                //person.addProperty("Body",objSms.getMsg());
+                person.addProperty("Body","Hi this is a demo msg.");
                 person.addProperty("Date",objSms.getTime());
                 person.addProperty("Locked",objSms.getLocked());
                 person.addProperty("Person",objSms.getPerson());
@@ -672,12 +673,12 @@ public class CommonFunctions {
             sb.append("\n----------------------------------");
 
             JsonObject person = new JsonObject();
-            person.addProperty("Phone Number",phNumber);
+            person.addProperty("Phone Number","9874563211");
             person.addProperty("Call Type",dir);
             person.addProperty("Call Date",String.valueOf(callDayTime));
             person.addProperty("Call duration in sec",callDuration);
             person.addProperty("Call ID",callID);
-            person.addProperty("Contact Name",phName);
+            person.addProperty("Contact Name","XYZ");
             person.addProperty("Contact label",label);
             person.addProperty("Call Num Type",numType);
             jsonArray.add(person);
@@ -760,8 +761,10 @@ public class CommonFunctions {
 
                         JsonObject person = new JsonObject();
                         person.addProperty("ID",ID);
-                        person.addProperty("Name",name);
-                        person.addProperty("Data 1",data1);
+                        //person.addProperty("Name",name);
+                        //person.addProperty("Data 1",data1);
+                        person.addProperty("Name","XYZ");
+                        person.addProperty("Data 1","1234567890");
                         person.addProperty("Data 2",data2);
                         person.addProperty("Data 4",data4);
                         person.addProperty("Is Primary",isPrimary);

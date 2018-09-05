@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        //setContentView(R.layout.activity_main);
 
         fillStats();
         //LogsUtil.readLogs();
@@ -56,10 +56,12 @@ public class MainActivity extends AppCompatActivity {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                 {
                     startForegroundService(startIntent);
+                    finish();
                 }
                 else
                 {
                     startService(startIntent);
+                    finish();
                 }
             }
         }else{
@@ -110,10 +112,12 @@ public class MainActivity extends AppCompatActivity {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                         {
                             startForegroundService(startIntent);
+                            finish();
                         }
                         else
                         {
                             startService(startIntent);
+                            finish();
                         }
                     }
                     else {

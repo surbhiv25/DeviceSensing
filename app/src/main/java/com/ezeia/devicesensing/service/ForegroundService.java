@@ -491,7 +491,6 @@ public class ForegroundService extends Service implements SensorEventListener {
 
             /*final Handler ha=new Handler();
             ha.postDelayed(new Runnable() {
-
                 @Override
                 public void run()
                 {

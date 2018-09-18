@@ -6,6 +6,9 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.provider.Settings;
 import android.support.annotation.RequiresApi;
@@ -15,10 +18,22 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.crashlytics.android.Crashlytics;
+import com.ezeia.devicesensing.receivers.ScreenReceiver;
 import com.ezeia.devicesensing.service.ForegroundService;
 import com.ezeia.devicesensing.utils.Constants;
+
+import java.io.IOException;
+import java.lang.ref.WeakReference;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
+import io.fabric.sdk.android.Fabric;
 
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
@@ -34,14 +49,93 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int MY_PERMISSIONS_REQUEST_PACKAGE_USAGE_STATS = 100;
     private final int PERMISSION_REQUEST_CODE = 200;
+    Button forceCrash,btn_pushData;
+    TextView txt_message;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_main);
+        Fabric.with(this, new Crashlytics());
 
         fillStats();
+        btnClick();
         //LogsUtil.readLogs();
+    }
+
+    private void btnClick(){
+
+        txt_message = findViewById(R.id.txt_message);
+
+        btn_pushData = findViewById(R.id.btn_pushData);
+        btn_pushData.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                /*if(isNetworkAvailable()){
+                    txt_message.setText("");
+                    ScreenReceiver.startCreatingJSON(MainActivity.this,txt_message);
+                }else{
+                    txt_message.setText("Please check your internet connection.");
+                }*/
+
+                MyTask task = new MyTask(MainActivity.this);
+                task.execute();
+            }
+        });
+    }
+
+    private static class MyTask extends AsyncTask<Void, Void, Boolean> {
+
+        private WeakReference<MainActivity> activityReference;
+
+        // only retain a weak reference to the activity
+        MyTask(MainActivity context) {
+            activityReference = new WeakReference<>(context);
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... v) {
+            boolean success = false;
+            try {
+                URL url = new URL("https://google.com");
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                connection.setConnectTimeout(10000);
+                connection.connect();
+                success = connection.getResponseCode() == 200;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return success;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean aVoid) {
+            super.onPostExecute(aVoid);
+
+            // get a reference to the activity if it is still there
+            MainActivity activity = activityReference.get();
+            if (activity == null || activity.isFinishing()) return;
+
+            // modify the activity's UI
+            TextView textView = activity.findViewById(R.id.txt_message);
+            if(aVoid){
+                textView.setText("");
+                ScreenReceiver.startCreatingJSON(activity,textView);
+            }else{
+                textView.setText("Please check your internet connection.");
+            }
+        }
+    }
+
+    private boolean checkInternetConnection(Context context) {
+        ConnectivityManager manager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo ni = manager.getActiveNetworkInfo();
+
+        if (ni != null && ni.getState() == NetworkInfo.State.CONNECTED) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     private void fillStats()
@@ -53,15 +147,13 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 Intent startIntent = new Intent(MainActivity.this, ForegroundService.class);
                 startIntent.setAction(Constants.ACTION.STARTFOREGROUND_ACTION);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     startForegroundService(startIntent);
-                    finish();
+                    //finish();
                 }
-                else
-                {
+                else {
                     startService(startIntent);
-                    finish();
+                    //finish();
                 }
             }
         }else{
@@ -119,8 +211,7 @@ public class MainActivity extends AppCompatActivity {
                             startService(startIntent);
                             finish();
                         }
-                    }
-                    else {
+                    } else {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                             if (shouldShowRequestPermissionRationale(ACCESS_FINE_LOCATION)) {
                                 showMessageOKCancel(

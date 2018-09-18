@@ -31,8 +31,6 @@ dependencies {
     configurations {
         all*.exclude group: 'com.google.code.gson'
     }
-    //implementation files('libs/funflib.jar')
-    //implementation files('libs/gson-2.1.jar')
     implementation 'android.arch.persistence.room:runtime:1.1.1'
     annotationProcessor 'android.arch.persistence.room:compiler:1.1.1'
     testImplementation 'junit:junit:4.12'
@@ -43,9 +41,10 @@ dependencies {
 
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:1.6.1'
     releaseImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.6.1'
-    // Optional, if you use support library fragments:
     debugImplementation 'com.squareup.leakcanary:leakcanary-support-fragment:1.6.1'
 
     implementation 'com.crashlytics.sdk.android:crashlytics:2.9.5'
     implementation 'com.google.firebase:firebase-core:16.0.3'
+
+    implementation 'com.google.android.gms:play-services-location:15.0.1'
 }

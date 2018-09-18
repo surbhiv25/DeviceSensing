@@ -10,21 +10,24 @@ import android.os.Build;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.crashlytics.android.Crashlytics;
 import com.ezeia.devicesensing.SqliteRoom.Database.AppDatabase;
 import com.ezeia.devicesensing.SqliteRoom.utils.DatabaseInitializer;
+import com.ezeia.devicesensing.pref.Preference;
 import com.ezeia.devicesensing.service.ForegroundService;
 import com.ezeia.devicesensing.utils.CommonFunctions;
 import com.ezeia.devicesensing.utils.Functions;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Set;
 import java.util.regex.Pattern;
+
+import io.fabric.sdk.android.Fabric;
 
 public class BTStateChangedReceiver extends BroadcastReceiver {
 
@@ -35,6 +38,7 @@ public class BTStateChangedReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent)
     {
+        Fabric.with(context, new Crashlytics());
         int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1);
         String action = intent.getAction();
         this.context = context;
@@ -46,6 +50,7 @@ public class BTStateChangedReceiver extends BroadcastReceiver {
             //Log.i(ForegroundService.LOG_TAG,"INFO: NAME- "+device.getName()+"\nADDRESS- "+device.getAddress()
                    // +"\nBOND STATE- "+device.getBondState()+"\nTYPE- "+device.getType());
 
+            Toast.makeText(context,"Bluetooth device connected",Toast.LENGTH_SHORT).show();
             LinkedHashMap<String,String> hashMap = new LinkedHashMap<>();
             hashMap.put("connected", "true");
             hashMap.put("name", device.getName());
@@ -62,6 +67,7 @@ public class BTStateChangedReceiver extends BroadcastReceiver {
             //Log.i(ForegroundService.LOG_TAG,"INFO: NAME- "+device.getName()+"\nADDRESS- "+device.getAddress()
                    // +"\nBOND STATE- "+device.getBondState()+"\nTYPE- "+device.getType());
 
+            Toast.makeText(context,"Bluetooth device disconnected",Toast.LENGTH_SHORT).show();
             LinkedHashMap<String,String> hashMap = new LinkedHashMap<>();
             hashMap.put("connected", "false");
             hashMap.put("name", device.getName());
@@ -100,6 +106,7 @@ public class BTStateChangedReceiver extends BroadcastReceiver {
                 break;
 
             case BluetoothAdapter.STATE_OFF: {
+                Toast.makeText(context,"Bluetooth OFF",Toast.LENGTH_SHORT).show();
                 Log.i(ForegroundService.LOG_TAG, "BLUETOOTH OFF: " + CommonFunctions.fetchDateInUTC());
                 String nameState = checkBluetoothConn();
                 //Log.i(ForegroundService.LOG_TAG, "NAME STATE: " + nameState);
@@ -128,6 +135,7 @@ public class BTStateChangedReceiver extends BroadcastReceiver {
             }
 
             case BluetoothAdapter.STATE_ON:
+                Toast.makeText(context,"Bluetooth ON",Toast.LENGTH_SHORT).show();
                 //Log.i(ForegroundService.LOG_TAG,"BLUETOOTH ON: "+ CommonFunctions.fetchDateInUTC());
 
                 String nameState = checkBluetoothConn();
@@ -274,7 +282,7 @@ public class BTStateChangedReceiver extends BroadcastReceiver {
                 Functions functions = new Functions(context);
                 JsonObject objectLoc = functions.fetchLocation();
                 subItems.add("location",objectLoc);
-
+                Log.i(ForegroundService.LOG_TAG, "Location is..."+objectLoc.toString());
             }
         }
         //DatabaseInitializer.deleteProbe(AppDatabase.getAppDatabase(context),"Bluetooth_State");
@@ -318,7 +326,7 @@ public class BTStateChangedReceiver extends BroadcastReceiver {
 
             //DatabaseInitializer.deleteProbe(AppDatabase.getAppDatabase(context),"Bluetooth_Connection");
             //header.put("Bluetooth_Connection",subItems);
-            //Log.i(ForegroundService.LOG_TAG,"JSONNN...."+subItems);
+            Log.i(ForegroundService.LOG_TAG, "Location is..."+objectLoc.toString());
             DatabaseInitializer.addData(AppDatabase.getAppDatabase(context),"Bluetooth_Connection",subItems.toString(),CommonFunctions.fetchDateInUTC());
         }
     }

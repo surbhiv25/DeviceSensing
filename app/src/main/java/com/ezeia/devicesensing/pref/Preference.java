@@ -18,9 +18,6 @@ public class Preference {
         public static final String BATTERY_PLUGGED = "battery_plugged";
 
         public static final String PACKAGE_NAME = "package_name";
-
-        static final String AUTH_TOKEN = "auth_token";
-
         public static final String START_TIME = "start_time";
         public static final String CLOSE_TIME = "close_time";
 
@@ -34,12 +31,25 @@ public class Preference {
         public static final String ACC_Y = "AccY";
         public static final String ACC_Z = "AccZ";
         public static final String ACCURACY = "Accuracy";
-        public static final String ACC_TIMESTAMP = "timestamp";
 
         public static final String CELL_TOWER_SIM = "cell_tower_sim";
         public static final String CELL_TOWER_VAL = "cell_tower_strength";
 
         public static final String FIRST_REPORT = "first_report";
+
+        public static final String LOC_LATITUDE = "latitude";
+        public static final String LOC_LONGITUDE = "longitude";
+        public static final String LOC_ALTITUDE = "altitude";
+        public static final String LOC_ACCURACY = "accuracy";
+        public static final String LOC_SPEED = "speed";
+        public static final String LOC_BEARING = "bearing";
+        public static final String LOC_HAS_ACCURACY = "has_accuracy";
+        public static final String LOC_HAS_ALTITUDE = "has_altitude";
+        public static final String LOC_HAS_SPEED = "has_speed";
+        public static final String LOC_HAS_BEARING = "has_bearing";
+        public static final String LOC_MOCK_PROVIDER = "is_mock_provider";
+        public static final String LOC_PROVIDER = "provider";
+        public static final String LOC_ELAPSED_TIME = "elapsed_time";
     }
 
     private Preference(Context context) {
@@ -56,7 +66,6 @@ public class Preference {
         }
         return sSharedPrefs;
     }
-
 
     public void put(String key, String val) {
         doEdit();
@@ -154,7 +163,6 @@ public class Preference {
         doCommit();
     }
 
-
     public void clear() {
         doEdit();
         mEditor.clear();
@@ -191,14 +199,6 @@ public class Preference {
 
     public boolean isPackageNameEmpty() {
         return TextUtils.isEmpty(getString(Key.PACKAGE_NAME));
-    }
-
-    private boolean isAuthTokenEmpty() {
-        return TextUtils.isEmpty(getString(Key.AUTH_TOKEN));
-    }
-
-    public String getAuthToken() {
-        return isAuthTokenEmpty() ? "" : getString(Key.AUTH_TOKEN);
     }
 
     private boolean isStartTimeEmpty() {
@@ -252,14 +252,14 @@ public class Preference {
         return TextUtils.isEmpty(getString(Key.ACC_Y));
     }
     public String getAccY() {
-        return !isAccYEmpty() ? "" : getString(Key.ACC_Y);
+        return isAccYEmpty() ? "" : getString(Key.ACC_Y);
     }
 
     public boolean isAccZEmpty() {
         return TextUtils.isEmpty(getString(Key.ACC_Z));
     }
     public String getAccZ() {
-        return !isAccZEmpty() ? "" : getString(Key.ACC_Z);
+        return isAccZEmpty() ? "" : getString(Key.ACC_Z);
     }
 
     public boolean isAccuracyEmpty() {
@@ -268,12 +268,6 @@ public class Preference {
     public String getAccuracy() {
         return !isAccuracyEmpty() ? "" : getString(Key.ACCURACY);
     }
-
-    public boolean isTimestampEmpty() {
-        return getBoolean(Key.ACC_TIMESTAMP);
-    }
-    public String getAccTimestamp() {
-        return !isTimestampEmpty() ? "" : getString(Key.ACC_TIMESTAMP); }
 
     public boolean isCellTowerEmpty() {
         return TextUtils.isEmpty(getString(Key.CELL_TOWER_SIM));
@@ -291,6 +285,44 @@ public class Preference {
     }
     public String getFirstReportDate() {
         return isFirstReportEmpty() ? "" : getString(Key.FIRST_REPORT);
+    }
+
+    public String getLatitude() {
+        return getString(Key.LOC_LATITUDE);
+    }
+    public String getLongitude() {
+        return getString(Key.LOC_LONGITUDE);
+    }
+    public String getAltitude() {
+        return getString(Key.LOC_ALTITUDE);
+    }
+    public String getLocAccuracy() {
+        return getString(Key.LOC_ACCURACY);
+    }
+    public String getSpeed() {
+        return getString(Key.LOC_SPEED);
+    }
+    public String getBearing() {
+        return getString(Key.LOC_BEARING);
+    }
+    public Boolean getHasAccuracy() {
+        return getBoolean(Key.LOC_HAS_ACCURACY);
+    }
+    public Boolean getHasAltitude() {
+        return getBoolean(Key.LOC_HAS_ALTITUDE);
+    }
+    public Boolean getHasSpeed() {
+        return getBoolean(Key.LOC_HAS_SPEED);
+    }
+    public Boolean getHasBearing() {
+        return getBoolean(Key.LOC_HAS_BEARING);
+    }
+    public Boolean getMockProvider() { return getBoolean(Key.LOC_MOCK_PROVIDER); }
+    public String getProvider() {
+        return getString(Key.LOC_PROVIDER);
+    }
+    public String getElapsedTime() {
+        return getString(Key.LOC_ELAPSED_TIME);
     }
 
 }

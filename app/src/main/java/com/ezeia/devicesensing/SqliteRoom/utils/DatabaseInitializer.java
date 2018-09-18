@@ -41,6 +41,10 @@ public class DatabaseInitializer {
         db.userDao().deleteByName(probeName);
     }
 
+    public static void deleteAllData(final AppDatabase db) {
+        db.userDao().delete();
+    }
+
     public static void addData(AppDatabase db, String probeName, String probeInfo, String timeStamp) {
         DataFetch user = new DataFetch();
         user.setProbeName(probeName);
@@ -48,12 +52,12 @@ public class DatabaseInitializer {
         user.setTimeStamp(timeStamp);
         addUser(db, user);
 
-        List<DataFetch> userList = db.userDao().getAll(probeName);
-        for(DataFetch user1 : userList)
-        {
+        //List<DataFetch> userList = db.userDao().getAll(probeName);
+        //for(DataFetch user1 : userList)
+        //{
             //Log.i(ForegroundService.LOG_TAG, "SAVED DATA..." +"PROBE NAME: "+user1.getProbeName()
                    // +"\nPROBE INFO: "+user1.getProbeInfo()+"\nTIMESTAMP: "+user1.getTimeStamp());
-        }
+        //}
     }
 
     public static org.json.JSONArray fetchJsonArray(AppDatabase db, String probeName) throws JSONException {

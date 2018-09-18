@@ -4,8 +4,12 @@ import android.arch.persistence.room.Database;
 import android.arch.persistence.room.Room;
 import android.arch.persistence.room.RoomDatabase;
 import android.content.Context;
+
+import com.crashlytics.android.Crashlytics;
 import com.ezeia.devicesensing.SqliteRoom.Dao.DataFetchDao;
 import com.ezeia.devicesensing.SqliteRoom.entity.DataFetch;
+
+import io.fabric.sdk.android.Fabric;
 
 @Database(entities = {DataFetch.class}, version = 1, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
@@ -15,6 +19,7 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract DataFetchDao userDao();
 
     public static AppDatabase getAppDatabase(Context context) {
+        Fabric.with(context, new Crashlytics());
         if (INSTANCE == null) {
             INSTANCE =
                     Room.databaseBuilder(context, AppDatabase.class, "user-database")

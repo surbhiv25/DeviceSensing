@@ -15,6 +15,8 @@ import com.ezeia.devicesensing.LogsUtil;
 import com.ezeia.devicesensing.SqliteRoom.Database.AppDatabase;
 import com.ezeia.devicesensing.SqliteRoom.utils.DatabaseInitializer;
 import com.ezeia.devicesensing.pref.Preference;
+import com.ezeia.devicesensing.receivers.LocationReceiver;
+import com.ezeia.devicesensing.service.ForegroundService;
 import com.ezeia.devicesensing.utils.CellTower.CellTowerStateListener;
 import com.ezeia.devicesensing.utils.Location.DeviceLoc;
 import com.ezeia.devicesensing.utils.Location.GPSTracker;
@@ -169,7 +171,12 @@ public class Functions
 
     public JsonObject fetchLocation(){
 
-        GPSTracker gpstracker=new GPSTracker(ctx);
+        String latitude = "0.0",longitude = "0.0",altitude = "0.0",accuracy = "0.0",
+                speed = "0",bearing = "0",elapsedTime = "0",provider = "null";
+        Boolean hasAccuracy = false,hasAltitude = false,
+                hasSpeed = false,hasBearing = false,isFromMockProvider = false;
+
+        /* GPSTracker gpstracker=new GPSTracker(ctx);
         double latitude=gpstracker.getLatitude();
         double longitude=gpstracker.getLongitude();
         double altitude = gpstracker.getAltitude();
@@ -183,10 +190,28 @@ public class Functions
         boolean isFromMockProvider = gpstracker.isFromMockProvider();
         String provider = gpstracker.getProvider();
         double elapsedTime = gpstracker.getElapsedTime();
+        */
 
-        Log.i(TAG,"LOCATION:\n "+latitude+"--"+longitude);
-
-        JsonObject object = new JsonObject();
+        JsonObject object;
+        if(LocationReceiver.checkIfLocEnabled(ctx))
+        {
+            if(Preference.getInstance(ctx) != null) {
+                latitude = Preference.getInstance(ctx).getLatitude();
+                longitude = Preference.getInstance(ctx).getLongitude();
+                altitude = Preference.getInstance(ctx).getAltitude();
+                accuracy = Preference.getInstance(ctx).getLocAccuracy();
+                speed = Preference.getInstance(ctx).getSpeed();
+                bearing = Preference.getInstance(ctx).getBearing();
+                hasAccuracy = Preference.getInstance(ctx).getHasAccuracy();
+                hasAltitude = Preference.getInstance(ctx).getHasAltitude();
+                hasSpeed = Preference.getInstance(ctx).getHasSpeed();
+                hasBearing = Preference.getInstance(ctx).getHasBearing();
+                isFromMockProvider = Preference.getInstance(ctx).getMockProvider();
+                provider = Preference.getInstance(ctx).getProvider();
+                elapsedTime = Preference.getInstance(ctx).getElapsedTime();
+            }
+        }
+        object = new JsonObject();
         object.addProperty("Latitude",latitude);
         object.addProperty("Longitude",longitude);
         object.addProperty("Altitude",altitude);
@@ -201,7 +226,6 @@ public class Functions
         object.addProperty("Provider",provider);
         object.addProperty("Elapsed Time",elapsedTime);
         object.addProperty("Timestamp",CommonFunctions.fetchDateInUTC());
-
         return object;
     }
 
@@ -217,6 +241,7 @@ public class Functions
         object.addProperty("Accuracy",acc);
         object.addProperty("timestamp",CommonFunctions.fetchDateInUTC());
         object.add("location",objectLoc);
+        Log.i("SENSOR SAVE INFO", x+"--"+y+"--"+z);
         DatabaseInitializer.addData(AppDatabase.getAppDatabase(ctx),"Sensor",object.toString(),CommonFunctions.fetchDateInUTC());
     }
 
@@ -230,6 +255,7 @@ public class Functions
         Functions functions = new Functions(ctx);
         JsonObject objectLoc = functions.fetchLocation();
         object.add("location",objectLoc);
+        Log.i("LOCATION", "Location is..."+objectLoc.toString());
 
         DatabaseInitializer.addData(AppDatabase.getAppDatabase(ctx),"CellTower",object.toString(),CommonFunctions.fetchDateInUTC());
 

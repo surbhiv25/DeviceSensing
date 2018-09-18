@@ -25,12 +25,15 @@ public interface DataFetchDao {
     @Query("DELETE FROM datafetch where ProbeName = :Name")
     void deleteByName(String Name);
 
+    @Query("UPDATE datafetch SET SubmitFlag=:submitFlag WHERE SubmitFlag = :currentFlg")
+    void update(String submitFlag, String currentFlg);
+
     @Query("SELECT COUNT(*) from datafetch")
     int countUsers();
 
     @Insert
     void insertAll(DataFetch... users);
 
-    @Delete
-    void delete(DataFetch user);
+    @Query("DELETE from datafetch")
+    void delete();
 }

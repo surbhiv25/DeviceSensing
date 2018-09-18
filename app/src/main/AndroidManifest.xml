@@ -64,6 +64,11 @@
 
         <service android:name=".utils.Location.GPSTracker" />
 
+        <meta-data
+            android:name="io.fabric.ApiKey"
+            android:value="eae077e99fb518626253b3e8fa5e65de8df67b12"
+            />
+
     </application>
 
 </manifest>

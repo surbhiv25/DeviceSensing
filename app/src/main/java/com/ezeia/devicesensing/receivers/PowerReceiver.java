@@ -7,6 +7,7 @@ import android.os.BatteryManager;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.crashlytics.android.Crashlytics;
 import com.ezeia.devicesensing.SqliteRoom.Database.AppDatabase;
 import com.ezeia.devicesensing.SqliteRoom.utils.DatabaseInitializer;
 import com.ezeia.devicesensing.pref.Preference;
@@ -15,6 +16,8 @@ import com.ezeia.devicesensing.utils.CommonFunctions;
 import com.ezeia.devicesensing.utils.Functions;
 import com.google.gson.JsonObject;
 
+import io.fabric.sdk.android.Fabric;
+
 public class PowerReceiver extends BroadcastReceiver {
 
     Context ctx;
@@ -22,6 +25,7 @@ public class PowerReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent)
     {
+        Fabric.with(context, new Crashlytics());
         int state = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
         ctx = context;
         switch(state)
@@ -38,7 +42,7 @@ public class PowerReceiver extends BroadcastReceiver {
                         createJson("USB");
 
                         //Log.i(ForegroundService.LOG_TAG,"BATTERY PLUGGED IN USB: "+ CommonFunctions.fetchDateInUTC());
-                        //Toast.makeText(context, "BATTERY PLUGGED IN USB", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context, "Battery Plugged In USB", Toast.LENGTH_SHORT).show();
                     }
                     else
                     {
@@ -50,7 +54,7 @@ public class PowerReceiver extends BroadcastReceiver {
                             createJson("USB");
 
                             //Log.i(ForegroundService.LOG_TAG,"BATTERY PLUGGED IN USB: "+ CommonFunctions.fetchDateInUTC());
-                            //Toast.makeText(context, "BATTERY PLUGGED IN USB", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(context, "Battery Plugged In USB", Toast.LENGTH_SHORT).show();
                         }
                     }
                 }
@@ -67,7 +71,7 @@ public class PowerReceiver extends BroadcastReceiver {
                         createJson("AC");
 
                         //Log.i(ForegroundService.LOG_TAG,"BATTERY PLUGGED IN AC: "+ CommonFunctions.fetchDateInUTC());
-                        //Toast.makeText(context, "BATTERY PLUGGED IN AC", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context, "Battery Plugged In AC", Toast.LENGTH_SHORT).show();
                     }
                     else
                     {
@@ -79,7 +83,7 @@ public class PowerReceiver extends BroadcastReceiver {
                             createJson("AC");
 
                             //Log.i(ForegroundService.LOG_TAG,"BATTERY PLUGGED IN AC: "+ CommonFunctions.fetchDateInUTC());
-                            //Toast.makeText(context, "BATTERY PLUGGED IN AC", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(context, "Battery Plugged In AC", Toast.LENGTH_SHORT).show();
                         }
                     }
                 }
@@ -95,7 +99,7 @@ public class PowerReceiver extends BroadcastReceiver {
         Functions functions = new Functions(ctx);
         JsonObject objectLoc = functions.fetchLocation();
         object.add("location",objectLoc);
-
+        Log.i("LOCATION", "Location is..."+objectLoc.toString());
         DatabaseInitializer.addData(AppDatabase.getAppDatabase(ctx),"BatteryPlug",object.toString(),CommonFunctions.fetchDateInUTC());
     }
 

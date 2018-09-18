@@ -10,6 +10,7 @@ import android.os.Build;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.crashlytics.android.Crashlytics;
 import com.ezeia.devicesensing.SqliteRoom.Database.AppDatabase;
 import com.ezeia.devicesensing.SqliteRoom.utils.DatabaseInitializer;
 import com.ezeia.devicesensing.service.ForegroundService;
@@ -18,12 +19,15 @@ import com.ezeia.devicesensing.utils.Functions;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
+import io.fabric.sdk.android.Fabric;
+
 public class WifiReceiver extends BroadcastReceiver {
     private Context context;
 
     @Override
     public void onReceive(Context context, Intent intent)
     {
+        Fabric.with(context, new Crashlytics());
         this.context = context;
         int WifiState = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, -1);
 
@@ -32,7 +36,7 @@ public class WifiReceiver extends BroadcastReceiver {
                 //Log.i(ForegroundService.LOG_TAG,"WIFI ON: "+ CommonFunctions.fetchDateInUTC());
                 getConnectedWifi("ON");
                 //Log.i(ForegroundService.LOG_TAG,"CONNECTED WIFI INFO: "+getConnectedWifi("ON"));
-                //Toast.makeText(context,"wifi enabled", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context,"Wifi ON", Toast.LENGTH_SHORT).show();
 
                 break;
 
@@ -43,7 +47,7 @@ public class WifiReceiver extends BroadcastReceiver {
             case WifiManager.WIFI_STATE_DISABLED:
                 //Log.i(ForegroundService.LOG_TAG,"WIFI OFF: "+ CommonFunctions.fetchDateInUTC());
                 //Log.i(ForegroundService.LOG_TAG,"CONNECTED WIFI INFO: "+getConnectedWifi());
-                //Toast.makeText(context,"wifi disabled", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context,"Wifi OFF", Toast.LENGTH_SHORT).show();
 
                 createJson("OFF");
 
@@ -97,6 +101,8 @@ public class WifiReceiver extends BroadcastReceiver {
         Functions functions = new Functions(context);
         JsonObject objectLoc = functions.fetchLocation();
         jsonObject.add("location",objectLoc);
+        Log.i("LOCATION", "Location is..."+objectLoc.toString());
+
         DatabaseInitializer.addData(AppDatabase.getAppDatabase(context),"WifiConnection",object.toString(),CommonFunctions.fetchDateInUTC());
     }
 
@@ -104,6 +110,7 @@ public class WifiReceiver extends BroadcastReceiver {
 
         Functions functions = new Functions(context);
         JsonObject objectLoc = functions.fetchLocation();
+        Log.i("LOCATION", "Location is..."+objectLoc.toString());
 
         JsonObject object = new JsonObject();
         object.addProperty("state",pluggedState);

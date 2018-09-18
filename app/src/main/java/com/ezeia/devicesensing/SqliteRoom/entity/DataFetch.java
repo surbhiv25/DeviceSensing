@@ -16,6 +16,17 @@ public class DataFetch {
     @ColumnInfo(name = "ProbeInfo")
     private String ProbeInfo;
 
+    public String getSubmitFlag() {
+        return SubmitFlag;
+    }
+
+    public void setSubmitFlag(String submitFlag) {
+        SubmitFlag = submitFlag;
+    }
+
+    @ColumnInfo(name = "SubmitFlag")
+    private String SubmitFlag;
+
     public String getTimeStamp() {
         return TimeStamp;
     }

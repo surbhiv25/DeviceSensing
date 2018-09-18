@@ -30,6 +30,8 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.Toast;
+
+import com.crashlytics.android.Crashlytics;
 import com.ezeia.devicesensing.LogsUtil;
 import com.ezeia.devicesensing.MainActivity;
 import com.ezeia.devicesensing.R;
@@ -49,6 +51,7 @@ import com.ezeia.devicesensing.receivers.WifiScanReceiver;
 import com.ezeia.devicesensing.utils.CommonFunctions;
 import com.ezeia.devicesensing.utils.Constants;
 import com.ezeia.devicesensing.utils.Functions;
+import com.ezeia.devicesensing.utils.Location.FetchLocation;
 import com.ezeia.devicesensing.utils.Sensor.SensorController;
 import com.ezeia.devicesensing.utils.Sensor.SensorModel.AbstractSensorModel;
 import com.ezeia.devicesensing.utils.Sensor.SensorType;
@@ -61,6 +64,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import io.fabric.sdk.android.Fabric;
 
 public class ForegroundService extends Service implements SensorEventListener {
 
@@ -98,7 +103,7 @@ public class ForegroundService extends Service implements SensorEventListener {
     public void onCreate() {
         super.onCreate();
         ctx = this;
-
+        Fabric.with(this, new Crashlytics());
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         Context context = getApplicationContext();
         mSensorController = new SensorController(sensorManager, context);
@@ -123,6 +128,8 @@ public class ForegroundService extends Service implements SensorEventListener {
         {
             functions.fetchUSageStats(this);
         }*/
+
+        FetchLocation loc = new FetchLocation(this);
     }
 
 
@@ -130,7 +137,7 @@ public class ForegroundService extends Service implements SensorEventListener {
     private void callReceivers(){
         //register BroadcastReceiver
 
-        DatabaseInitializer.deleteProbe(AppDatabase.getAppDatabase(ctx),"DeviceInfo");
+        /*DatabaseInitializer.deleteProbe(AppDatabase.getAppDatabase(ctx),"DeviceInfo");
         DatabaseInitializer.deleteProbe(AppDatabase.getAppDatabase(ctx),"Install");
         DatabaseInitializer.deleteProbe(AppDatabase.getAppDatabase(ctx),"Uninstall");
         DatabaseInitializer.deleteProbe(AppDatabase.getAppDatabase(ctx),"AppUsage");
@@ -154,7 +161,9 @@ public class ForegroundService extends Service implements SensorEventListener {
         DatabaseInitializer.deleteProbe(AppDatabase.getAppDatabase(ctx),"Location");
         DatabaseInitializer.deleteProbe(AppDatabase.getAppDatabase(ctx),"BatteryPlug");
         DatabaseInitializer.deleteProbe(AppDatabase.getAppDatabase(ctx),"FINAL_JSON");
-        //DatabaseInitializer.deleteProbe(AppDatabase.getAppDatabase(ctx),"ActiveServices");
+       */
+
+        DatabaseInitializer.deleteAllData(AppDatabase.getAppDatabase(ctx));
 
         Preference.getInstance(ctx).clear();
 
@@ -239,38 +248,6 @@ public class ForegroundService extends Service implements SensorEventListener {
             Sensor mAccelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
             mSensorController.registerListener(ForegroundService.this, mAccelerometer);
 
-            final Handler handler = new Handler();
-            Timer t = new Timer();
-            t.scheduleAtFixedRate(new TimerTask() {
-                @Override
-                public void run() {
-                    handler.post(new Runnable() {
-                        public void run() {
-
-                            isIntervalDone = true;
-                            String xAcc = "",yAcc ="", zAcc = "", accuracy ="";
-                            if(Preference.getInstance(ctx) != null){
-                               if(Preference.getInstance(ctx).getAccX() != null){
-                                    xAcc = Preference.getInstance(ctx).getAccX();
-                                }
-                                if(Preference.getInstance(ctx).getAccY() != null){
-                                    yAcc = Preference.getInstance(ctx).getAccY();
-                                }
-                                if(Preference.getInstance(ctx).getAccZ() != null){
-                                    zAcc = Preference.getInstance(ctx).getAccZ();
-                                }
-                                if(Preference.getInstance(ctx).getAccuracy() != null){
-                                    accuracy = Preference.getInstance(ctx).getAccuracy();
-                                }
-                                Log.i("TAG","SENSOR GET..."+xAcc+"--"+yAcc+"--"+zAcc+"--"+accuracy);
-                                Functions func = new Functions(ctx);
-                                func.createJSon(xAcc,yAcc,zAcc,accuracy);
-                            }
-                        }
-                    });
-                }
-            }, 0, 60000);
-
             SensorType sensorType = mSensorTypes.get(0);
             AbstractSensorModel sensorModel = AbstractSensorModel.getSensorModelByType(sensorType,ctx);
 
@@ -286,6 +263,38 @@ public class ForegroundService extends Service implements SensorEventListener {
         {
             Log.i(LOG_TAG,"Accelerometer Sensor Not Available.");
         }
+
+        final Handler handler = new Handler();
+        Timer t = new Timer();
+        t.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                handler.post(new Runnable() {
+                    public void run() {
+
+                        isIntervalDone = true;
+                        String xAcc = "",yAcc ="", zAcc = "", accuracy ="";
+                        if(Preference.getInstance(ctx) != null){
+                            if(Preference.getInstance(ctx).getAccX() != null){
+                                xAcc = Preference.getInstance(ctx).getAccX();
+                            }
+                            if(Preference.getInstance(ctx).getAccY() != null){
+                                yAcc = Preference.getInstance(ctx).getAccY();
+                            }
+                            if(Preference.getInstance(ctx).getAccZ() != null){
+                                zAcc = Preference.getInstance(ctx).getAccZ();
+                            }
+                            if(Preference.getInstance(ctx).getAccuracy() != null){
+                                accuracy = Preference.getInstance(ctx).getAccuracy();
+                            }
+                            Log.i("TAG","SENSOR GET..."+xAcc+"--"+yAcc+"--"+zAcc+"--"+accuracy);
+                            Functions func = new Functions(ctx);
+                            func.createJSon(xAcc,yAcc,zAcc,accuracy);
+                        }
+                    }
+                });
+            }
+        }, 0, 60000);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
@@ -331,7 +340,7 @@ public class ForegroundService extends Service implements SensorEventListener {
 
             Bitmap icon = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
 
-            Notification notification = new NotificationCompat.Builder(this,"000")
+            Notification notification = new NotificationCompat.Builder(this,"100")
                     .setSmallIcon(R.mipmap.ic_launcher)
                     .setLargeIcon(Bitmap.createScaledBitmap(icon, 128, 128, false))
                     .setColor(Color.parseColor("#00f6d8"))
@@ -378,7 +387,7 @@ public class ForegroundService extends Service implements SensorEventListener {
                 .when(getPackageName(), new AppChecker.Listener() {
                     @Override
                     public void onForeground(String packageName) {
-                        Toast.makeText(getBaseContext(), "Our app is in the foreground.", Toast.LENGTH_SHORT).show();
+                       //  Toast.makeText(getBaseContext(), "Our app is in the foreground.", Toast.LENGTH_SHORT).show();
                     }
                 })
                 .whenOther(new AppChecker.Listener() {
@@ -438,12 +447,14 @@ public class ForegroundService extends Service implements SensorEventListener {
     {
         Functions functions = new Functions(ctx);
         JsonObject objectLoc = functions.fetchLocation();
+        Log.i("LOCATION", "Location is..."+objectLoc.toString());
 
         JsonObject subItems = new JsonObject();
         subItems.addProperty("package_Name",packgeName);
         subItems.addProperty("start_Time",startTime);
         subItems.addProperty("close_Time",closeTime);
         subItems.add("location",objectLoc);
+        Log.i("APP USAGE",subItems.toString());
         DatabaseInitializer.addData(AppDatabase.getAppDatabase(ctx),"AppUsage",subItems.toString(), CommonFunctions.fetchDateInUTC());
     }
 
@@ -451,7 +462,7 @@ public class ForegroundService extends Service implements SensorEventListener {
     public void onDestroy() {
         super.onDestroy();
 
-        Toast.makeText(getApplicationContext(),"App Destroyed",Toast.LENGTH_SHORT).show();
+        //Toast.makeText(getApplicationContext(),"App Destroyed",Toast.LENGTH_SHORT).show();
         Log.i(LOG_TAG, "In onDestroy");
         unregisterReceiver(bluetoothReceiver);
         unregisterReceiver(wifiReceiver);

@@ -52,6 +52,8 @@ public class Preference {
         public static final String LOC_ELAPSED_TIME = "elapsed_time";
 
         public static final String UNIQUE_ID = "unique_id";
+
+        public static final String IS_REPORT_SENT = "is_report_sent";
     }
 
     private Preference(Context context) {
@@ -329,6 +331,10 @@ public class Preference {
 
     public String getUniqueID() {
         return getString(Key.UNIQUE_ID);
+    }
+
+    public Boolean getReportSentStatus() {
+        return getBoolean(Key.IS_REPORT_SENT);
     }
 
 }

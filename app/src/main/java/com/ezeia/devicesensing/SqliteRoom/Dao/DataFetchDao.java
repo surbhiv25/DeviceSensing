@@ -22,8 +22,8 @@ public interface DataFetchDao {
     @Query("SELECT ProbeInfo FROM datafetch where ProbeName LIKE  :ProbeName")
     String findSingleDataByName(String ProbeName);
 
-    @Query("SELECT ProbeInfo FROM datafetch where ProbeName LIKE  :ProbeName and SubmitFlag LIKE :SubmitFlag")
-    List<String> findFinalDataByName(String ProbeName, String SubmitFlag);
+    @Query("SELECT ProbeInfo FROM datafetch where ProbeName LIKE  :ProbeName")
+    String findFinalDataByName(String ProbeName);
 
     @Query("DELETE FROM datafetch where ProbeName = :Name")
     void deleteByName(String Name);

@@ -3,6 +3,7 @@ package com.ezeia.devicesensing.service;
 import android.content.Context;
 import android.util.Log;
 
+import com.amazonaws.AmazonClientException;
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.CognitoCachingCredentialsProvider;
 import com.amazonaws.mobileconnectors.kinesis.kinesisrecorder.KinesisFirehoseRecorder;
@@ -17,6 +18,7 @@ import com.ezeia.devicesensing.utils.Constants;
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -58,11 +60,11 @@ public class AwsUploader implements NetworkConnection.ResultListener {
         String kinesisStreamName = ctx.getString(R.string.kinesis_stream_name);
 
         JSONObject finalObject;
-        List<String> jsonList;
+        List<String> jsonList = null;
 
         String newLineAdd;
         try {
-            jsonList = DatabaseInitializer.fetchFinalJsonData(AppDatabase.getAppDatabase(ctx));
+            //jsonList = DatabaseInitializer.fetchFinalJsonData(AppDatabase.getAppDatabase(ctx));
             if(jsonList != null && jsonList.size() >0){
                 for(String data: jsonList){
                     uniqueID = DatabaseInitializer.fetchPrimaryID(AppDatabase.getAppDatabase(ctx),data);
@@ -115,11 +117,15 @@ public class AwsUploader implements NetworkConnection.ResultListener {
                 uniqueID = Preference.getInstance(ctx).getUniqueID();
             }
 
-            KinesisUpload task = new KinesisUpload(ctx,firehoseRecorder);
-            task.execute(uniqueID);
+            //KinesisUpload task = new KinesisUpload(ctx,firehoseRecorder);
+            //task.execute(uniqueID);
+
+            KinesisUploadTest task = new KinesisUploadTest(ctx,firehoseRecorder);
+            task.execute();
         }else{
-            String[] probeList = Constants.probeList;
-            DatabaseInitializer.deleteProbeByList(AppDatabase.getAppDatabase(ctx),probeList);
+            //String[] probeList = Constants.probeList;
+            //DatabaseInitializer.deleteProbeByList(AppDatabase.getAppDatabase(ctx),probeList);
+            DatabaseInitializer.deleteAllData(AppDatabase.getAppDatabase(ctx));
 
             Preference.getInstance(ctx).remove(Preference.Key.SCREEN_ON_TIME,Preference.Key.SCREEN_OFF_TIME,
                     Preference.Key.BATTERY_PLUGGED,Preference.Key.START_TIME,Preference.Key.CLOSE_TIME,
@@ -148,20 +154,58 @@ public class AwsUploader implements NetworkConnection.ResultListener {
             firehoseRecorder.saveRecord(put_string, firehoseStreamName);
     }
 
-    /*private KinesisProducer getKinesisProducer(){
-        if(kinesisProducer == null){
+    public void submitKinesisRecordTest() {
+        String kinesisStreamName = ctx.getString(R.string.kinesis_stream_name);
 
-            KinesisProducerConfiguration config = new KinesisProducerConfiguration();
-            config.setRegion(ctx.getString(R.string.region));
-            BasicAWSCredentials awsCreds = new BasicAWSCredentials(ctx.getString(R.string.access_key),ctx.getString(R.string.secret_key));
-            config.setCredentialsProvider(new AWSStaticCredentialsProvider(awsCreds));
-            config.setMaxConnections(1);
-            config.setRequestTimeout(6000);
-            config.setRecordMaxBufferedTime(5000);
-            kinesisProducer = new KinesisProducer(config);
+        JSONObject finalObject;
+        String jsonList;
+        String newLineAdd;
+        Boolean isSaved;
+        try {
+            jsonList = DatabaseInitializer.fetchFinalJsonData(AppDatabase.getAppDatabase(ctx));
+            if(jsonList != null) {
+                finalObject = new JSONObject(jsonList);
+                newLineAdd = finalObject.toString() + "\n";
+                try {
+                    firehoseRecorder.saveRecord(newLineAdd, kinesisStreamName);
+                    isSaved = true;
+                    Log.i("TAG","SUCCESSFULLY SAVING....");
+                } catch (AmazonClientException e) {
+                    isSaved = false;
+                    Log.i("TAG","ERROR IN SAVING...."+e);
+                }
+
+                if (isSaved) {
+                    DatabaseInitializer.deleteAllData(AppDatabase.getAppDatabase(ctx));
+                    Preference.getInstance(ctx).remove(Preference.Key.SCREEN_ON_TIME, Preference.Key.SCREEN_OFF_TIME,
+                            Preference.Key.BATTERY_PLUGGED, Preference.Key.START_TIME, Preference.Key.CLOSE_TIME,
+                            Preference.Key.PACKAGE_NAME, Preference.Key.IS_DEVICE_INFO, Preference.Key.ACC_X,
+                            Preference.Key.ACC_Y, Preference.Key.ACC_Z, Preference.Key.ACCURACY, Preference.Key.CELL_TOWER_SIM,
+                            Preference.Key.CELL_TOWER_VAL, Preference.Key.LOC_LATITUDE, Preference.Key.LOC_LONGITUDE,
+                            Preference.Key.LOC_ALTITUDE, Preference.Key.LOC_ACCURACY, Preference.Key.LOC_SPEED,
+                            Preference.Key.LOC_BEARING, Preference.Key.LOC_HAS_ALTITUDE, Preference.Key.LOC_HAS_ACCURACY,
+                            Preference.Key.LOC_HAS_BEARING, Preference.Key.LOC_HAS_SPEED, Preference.Key.LOC_MOCK_PROVIDER,
+                            Preference.Key.LOC_PROVIDER, Preference.Key.LOC_ELAPSED_TIME);
+
+                    KinesisUploadTest task = new KinesisUploadTest(ctx, firehoseRecorder);
+                    task.execute();
+                }
+
+               /* AwsUploader uploader = new AwsUploader(ctx);
+                NetworkConnection connection = new NetworkConnection(uploader);
+                connection.execute();*/
+
+                int maxLogSize = 1000;
+                for (int i = 0; i <= finalObject.toString().length() / maxLogSize; i++) {
+                    int start = i * maxLogSize;
+                    int end = (i + 1) * maxLogSize;
+                    end = end > finalObject.toString().length() ? finalObject.toString().length() : end;
+                    Log.i("SUBSTRING JSON", finalObject.toString().substring(start, end));
+                }
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
-        return kinesisProducer;
-    }*/
-
+    }
 
 }

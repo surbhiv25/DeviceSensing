@@ -85,7 +85,7 @@ public class DatabaseInitializer {
         user.setProbeName(probeName);
         user.setProbeInfo(probeInfo);
         user.setTimeStamp(timeStamp);
-        user.setSubmitFlag(submitFlag);
+        //user.setSubmitFlag(submitFlag);
         addUser(db, user);
 
         //List<DataFetch> userList = db.userDao().getAll(probeName);
@@ -138,9 +138,9 @@ public class DatabaseInitializer {
         return object;
     }
 
-    public static List<String> fetchFinalJsonData(AppDatabase db) {
+    public static String fetchFinalJsonData(AppDatabase db) {
 
-        return db.userDao().findFinalDataByName("FINAL_JSON","0");
+        return db.userDao().findFinalDataByName("FINAL_JSON");
     }
 
     public static String fetchPrimaryID(AppDatabase db,String probeData) {

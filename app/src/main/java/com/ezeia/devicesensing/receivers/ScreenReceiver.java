@@ -42,7 +42,11 @@ public class ScreenReceiver extends BroadcastReceiver{
                     public void run() {
                         if(!isCallActive(ctx) && !isMusicPlaying(ctx)){
                             Log.i(ForegroundService.LOG_TAG,"TIME AFTER 30 SECONDS..."+CommonFunctions.fetchDateInUTC());
-                            startCreatingJSON(ctx);
+                            if(Preference.getInstance(ctx) != null){
+                                if(!Preference.getInstance(ctx).getReportSentStatus()){
+                                    startCreatingJSON(ctx);
+                                }
+                            }
                         }
                         else if(isCallActive(ctx)){
                             Log.i(ForegroundService.LOG_TAG,"CALL ACTIVE IN 30 SECONDS..."+CommonFunctions.fetchDateInUTC());
@@ -57,6 +61,7 @@ public class ScreenReceiver extends BroadcastReceiver{
 
             } else if (intent.getAction().equals(Intent.ACTION_SCREEN_ON)) {
                 Toast.makeText(context, "Screen ON", Toast.LENGTH_SHORT).show();
+                Preference.getInstance(ctx).put(Preference.Key.IS_REPORT_SENT,false);
                 Preference.getInstance(context).put(Preference.Key.SCREEN_ON_TIME,CommonFunctions.fetchDateInUTC());
                 Log.i(ForegroundService.LOG_TAG,"SCREEN ON: "+ CommonFunctions.fetchDateInUTC());
                 //Toast.makeText(context,"SCREEN ON",Toast.LENGTH_SHORT).show();
@@ -82,8 +87,10 @@ public class ScreenReceiver extends BroadcastReceiver{
 
     private void startCreatingJSON(Context ctx)
     {
+        Preference.getInstance(ctx).put(Preference.Key.IS_REPORT_SENT,true);
         Functions func = new Functions(ctx);
         func.collectedWithReport();
+        func.collectedUponChange();
 
         if(Preference.getInstance(ctx) != null) {
             Boolean checkIfPluggedIn = Preference.getInstance(ctx).isFirstReportEmpty();
@@ -172,7 +179,7 @@ public class ScreenReceiver extends BroadcastReceiver{
                     object.toString(), CommonFunctions.fetchDateInUTC(), "0");
 
             AwsUploader uploader = new AwsUploader(ctx);
-            uploader.submitKinesisRecord();
+            uploader.submitKinesisRecordTest();
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -226,7 +233,7 @@ public class ScreenReceiver extends BroadcastReceiver{
                     object.toString(), CommonFunctions.fetchDateInUTC(), "0");
 
             AwsUploader uploader = new AwsUploader(ctx);
-            uploader.submitKinesisRecord();
+            uploader.submitKinesisRecordTest();
 
         } catch (JSONException e) {
             e.printStackTrace();

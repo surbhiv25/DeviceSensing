@@ -45,6 +45,7 @@ import com.ezeia.devicesensing.receivers.WifiScanReceiver;
 import com.ezeia.devicesensing.utils.CommonFunctions;
 import com.ezeia.devicesensing.utils.Constants;
 import com.ezeia.devicesensing.utils.Functions;
+import com.ezeia.devicesensing.utils.Location.FetchLocation;
 import com.ezeia.devicesensing.utils.Sensor.SensorController;
 import com.ezeia.devicesensing.utils.Sensor.SensorModel.AbstractSensorModel;
 import com.ezeia.devicesensing.utils.Sensor.SensorType;
@@ -104,9 +105,9 @@ public class ForegroundService extends Service implements SensorEventListener {
         Functions functions = new Functions(this);
         //functions.primaryKeyData();
 
-        if(!Preference.getInstance(ctx).getBoolean(Preference.Key.IS_DEVICE_INFO)){
-            functions.collectedUponChange();
-        }
+        //if(!Preference.getInstance(ctx).getBoolean(Preference.Key.IS_DEVICE_INFO)){
+            //functions.collectedUponChange();
+        //}
 
         functions.collectedUponUsage();
         functions.collectedWithActivity();
@@ -117,7 +118,7 @@ public class ForegroundService extends Service implements SensorEventListener {
             functions.fetchUSageStats(this);
         }*/
 
-        //FetchLocation loc = new FetchLocation(this);
+        FetchLocation loc = new FetchLocation(this);
     }
 
     private void createNotificationService(){

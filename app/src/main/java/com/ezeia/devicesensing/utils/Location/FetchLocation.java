@@ -18,7 +18,7 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
-class FetchLocation implements GoogleApiClient.ConnectionCallbacks,
+public class FetchLocation implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
     private final GoogleApiClient mGoogleApiClient;

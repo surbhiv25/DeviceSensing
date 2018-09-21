@@ -2,6 +2,8 @@ package com.ezeia.devicesensing.service;
 
 import android.app.AppOpsManager;
 import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
@@ -10,29 +12,22 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.location.Location;
 import android.location.LocationManager;
 import android.net.wifi.WifiManager;
 import android.os.Build;
-import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.RemoteViews;
-import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
-import com.ezeia.devicesensing.LogsUtil;
 import com.ezeia.devicesensing.MainActivity;
 import com.ezeia.devicesensing.R;
 import com.ezeia.devicesensing.SqliteRoom.Database.AppDatabase;
@@ -40,7 +35,6 @@ import com.ezeia.devicesensing.SqliteRoom.utils.DatabaseInitializer;
 import com.ezeia.devicesensing.pref.Preference;
 import com.ezeia.devicesensing.receivers.AirplaneModeReceiver;
 import com.ezeia.devicesensing.receivers.BTStateChangedReceiver;
-import com.ezeia.devicesensing.receivers.CameraEventReceiver;
 import com.ezeia.devicesensing.receivers.InstallAppReceiver;
 import com.ezeia.devicesensing.receivers.LocationReceiver;
 import com.ezeia.devicesensing.receivers.PowerReceiver;
@@ -51,7 +45,6 @@ import com.ezeia.devicesensing.receivers.WifiScanReceiver;
 import com.ezeia.devicesensing.utils.CommonFunctions;
 import com.ezeia.devicesensing.utils.Constants;
 import com.ezeia.devicesensing.utils.Functions;
-import com.ezeia.devicesensing.utils.Location.FetchLocation;
 import com.ezeia.devicesensing.utils.Sensor.SensorController;
 import com.ezeia.devicesensing.utils.Sensor.SensorModel.AbstractSensorModel;
 import com.ezeia.devicesensing.utils.Sensor.SensorType;
@@ -88,16 +81,10 @@ public class ForegroundService extends Service implements SensorEventListener {
     private SensorManager sensorManager = null;
     private static Timer timer = new Timer();
 
-    private float temperature=0;
-    private float x=0;
-    private float y=0;
-    private float z=0;
-    private Integer  tempAccuracy;
-    private Integer accAccuracy;
-    private Long  tempTimestamp;
-    private Long accTimestamp;
-    private int checkSensor = 0;
     private Boolean isIntervalDone = false;
+
+    private static final String PRIMARY_NOTIF_CHANNEL = "default";
+
 
     @Override
     public void onCreate() {
@@ -110,6 +97,7 @@ public class ForegroundService extends Service implements SensorEventListener {
         mSensorController.setup();
         mSensorTypes = Arrays.asList(SensorType.values());
 
+        createNotificationService();
         callReceivers();
         startChecker();
 
@@ -129,10 +117,38 @@ public class ForegroundService extends Service implements SensorEventListener {
             functions.fetchUSageStats(this);
         }*/
 
-        FetchLocation loc = new FetchLocation(this);
+        //FetchLocation loc = new FetchLocation(this);
     }
 
+    private void createNotificationService(){
 
+        Intent notificationIntent = new Intent(this, MainActivity.class);
+        notificationIntent.setAction(Constants.ACTION.MAIN_ACTION);
+        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+
+        RemoteViews notificationView = new RemoteViews(this.getPackageName(), R.layout.notification);
+
+        // And now, building and attaching the Play button.
+        //Intent buttonPlayIntent = new Intent(this, BTStateChangedReceiver.class);
+
+        //Bitmap icon = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            setupChannel();
+        }
+
+        Notification notification = new NotificationCompat.Builder(this, PRIMARY_NOTIF_CHANNEL)
+                .setSmallIcon(R.mipmap.ic_launcher)
+                //.setLargeIcon(Bitmap.createScaledBitmap(icon, 128, 128, false))
+                .setColor(Color.parseColor("#00f6d8"))
+                .setContent(notificationView)
+                .setPriority(Notification.PRIORITY_MIN)
+                .setOngoing(true).build();
+
+        startForeground(Constants.NOTIFICATION_ID.FOREGROUND_SERVICE, notification);
+    }
 
     private void callReceivers(){
         //register BroadcastReceiver
@@ -327,28 +343,8 @@ public class ForegroundService extends Service implements SensorEventListener {
 
             //Log.i(LOG_TAG, "Received Start Foreground Intent ");
 
-            Intent notificationIntent = new Intent(this, MainActivity.class);
-            notificationIntent.setAction(Constants.ACTION.MAIN_ACTION);
-            notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                    | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
-
-            RemoteViews notificationView = new RemoteViews(this.getPackageName(), R.layout.notification);
-
-            // And now, building and attaching the Play button.
-            //Intent buttonPlayIntent = new Intent(this, BTStateChangedReceiver.class);
-
-            Bitmap icon = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
-
-            Notification notification = new NotificationCompat.Builder(this,"100")
-                    .setSmallIcon(R.mipmap.ic_launcher)
-                    .setLargeIcon(Bitmap.createScaledBitmap(icon, 128, 128, false))
-                    .setColor(Color.parseColor("#00f6d8"))
-                    .setContent(notificationView)
-                    .setPriority(Notification.PRIORITY_MIN)
-                    .setOngoing(true).build();
-
-            startForeground(Constants.NOTIFICATION_ID.FOREGROUND_SERVICE, notification);
+            //-------------------
+      //  createNotificationService();
       /*  }
         else if (intent.getAction().equals(Constants.ACTION.STOPFOREGROUND_ACTION)) {
             Toast.makeText(this,"Stop Service",Toast.LENGTH_SHORT).show();
@@ -359,6 +355,23 @@ public class ForegroundService extends Service implements SensorEventListener {
         return START_REDELIVER_INTENT;
     }
 
+    private void setupChannel(){
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationChannel chan1;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            chan1 = new NotificationChannel(
+                    PRIMARY_NOTIF_CHANNEL,
+                    "default",
+                    NotificationManager.IMPORTANCE_NONE);
+
+            chan1.setLightColor(Color.TRANSPARENT);
+            chan1.setLockscreenVisibility(Notification.VISIBILITY_SECRET);
+
+            if(notificationManager != null)
+                notificationManager.createNotificationChannel(chan1);
+        }
+    }
+
     public void initializeTimerTask() {
 
         Timer timer = new Timer();
@@ -367,12 +380,11 @@ public class ForegroundService extends Service implements SensorEventListener {
             public void run() {
                 handler.post(new Runnable() {
                     public void run() {
-                        StringBuilder builder = LogsUtil.readCrashLogs();
-                        //Log.i("LOGSS",builder.toString());
+                      /*  StringBuilder builder = LogsUtil.readCrashLogs();
                         if(builder.toString().contains("com.example.workmanagerdemo")){
                             //Toast.makeText(getApplicationContext(),"FOUND LOG",Toast.LENGTH_SHORT).show();
                             Log.i("CRASH LOG",builder.toString());
-                        }
+                        }*/
                     }
                 });
             }
@@ -406,9 +418,7 @@ public class ForegroundService extends Service implements SensorEventListener {
                         }
                         else {
                             String pluggedInState = Preference.getInstance(ctx).getPackageName();
-                            if(pluggedInState.equals(packageName)) {
-                                //Toast.makeText(getBaseContext(), "Foreground: same app as earlier", Toast.LENGTH_SHORT).show();
-                            }else{
+                            if(!pluggedInState.equals(packageName)) {
 
                                 Preference.getInstance(ctx).put(Preference.Key.CLOSE_TIME, getCurrentTime());
                                 //Log.i(ForegroundService.LOG_TAG,"FOREGROUND APP CLOSE TIME: "+ getCurrentTime());
@@ -488,17 +498,16 @@ public class ForegroundService extends Service implements SensorEventListener {
     {
         if(sensorEvent.sensor.getType() == Sensor.TYPE_AMBIENT_TEMPERATURE)
         {
-            temperature = sensorEvent.values[0];
-            tempAccuracy = sensorEvent.accuracy;
-            tempTimestamp = sensorEvent.timestamp;
-            checkSensor = 1;
+            float temperature = sensorEvent.values[0];
+            Integer tempAccuracy = sensorEvent.accuracy;
+            Long tempTimestamp = sensorEvent.timestamp;
+
         } else if(sensorEvent.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-            x = sensorEvent.values[0];
-            y = sensorEvent.values[1];
-            z = sensorEvent.values[2];
-            accAccuracy = sensorEvent.accuracy;
-            accTimestamp = sensorEvent.timestamp;
-            checkSensor = 2;
+            float x = sensorEvent.values[0];
+            float y = sensorEvent.values[1];
+            float z = sensorEvent.values[2];
+            Integer accAccuracy = sensorEvent.accuracy;
+            Long accTimestamp = sensorEvent.timestamp;
 
             /*final Handler ha=new Handler();
             ha.postDelayed(new Runnable() {
@@ -520,7 +529,7 @@ public class ForegroundService extends Service implements SensorEventListener {
                     Preference.getInstance(this).put(Preference.Key.ACC_Z,String.valueOf(z));
                     Preference.getInstance(this).put(Preference.Key.ACCURACY,String.valueOf(accAccuracy));
                     //Preference.getInstance(this).put(String.valueOf(accTimestamp),Preference.Key.ACC_TIMESTAMP);
-                    Log.i("TAG","SENSOR VAL: "+x+"--"+y+"--"+z+"--"+accAccuracy);
+                    Log.i("TAG","SENSOR VAL: "+ x +"--"+ y +"--"+ z +"--"+ accAccuracy);
                 }
             }
         }

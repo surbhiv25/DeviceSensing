@@ -1,6 +1,5 @@
 package com.ezeia.devicesensing.utils.Location;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -19,20 +18,16 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
-public class FetchLocation implements GoogleApiClient.ConnectionCallbacks,
+class FetchLocation implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
-    GoogleApiClient mGoogleApiClient;
+    private final GoogleApiClient mGoogleApiClient;
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
 
     private Location mLocation;
-    private LocationRequest mLocationRequest;
-    private long UPDATE_INTERVAL = 5000;  /* 15 secs */
-    private long FASTEST_INTERVAL = 5000; /* 5 secs */
-    private Context ctx;
-    public double latitude, longitude,altitude,accuracy,speed,bearing,elapsedTime;
-    public boolean hasAccuracy,hasAltitude,hasSpeed,hasBearing,isFromMockProvider;
-    public String provider;
+    private final Context ctx;
+    private double latitude;
+    private double longitude;
 
     public FetchLocation(Context ctx) {
 
@@ -80,33 +75,33 @@ public class FetchLocation implements GoogleApiClient.ConnectionCallbacks,
         if(location!=null) {
             latitude = location.getLatitude();
             longitude = location.getLongitude();
-            accuracy = location.getAccuracy();
-            altitude = location.getAltitude();
-            speed = location.getSpeed();
-            bearing = location.getBearing();
-            hasAccuracy = location.hasAccuracy();
-            hasAltitude = location.hasAltitude();
-            hasSpeed = location.hasSpeed();
-            hasBearing = location.hasBearing();
-            isFromMockProvider = location.isFromMockProvider();
-            provider = location.getProvider();
-            elapsedTime = location.getElapsedRealtimeNanos();
+            double accuracy = location.getAccuracy();
+            double altitude = location.getAltitude();
+            double speed = location.getSpeed();
+            double bearing = location.getBearing();
+            boolean hasAccuracy = location.hasAccuracy();
+            boolean hasAltitude = location.hasAltitude();
+            boolean hasSpeed = location.hasSpeed();
+            boolean hasBearing = location.hasBearing();
+            boolean isFromMockProvider = location.isFromMockProvider();
+            String provider = location.getProvider();
+            double elapsedTime = location.getElapsedRealtimeNanos();
 
             Log.i("TAG","LOCATION IS..."+latitude+"---"+longitude);
             if(Preference.getInstance(ctx) != null){
                 Preference.getInstance(ctx).put(Preference.Key.LOC_LATITUDE,latitude);
                 Preference.getInstance(ctx).put(Preference.Key.LOC_LONGITUDE,longitude);
-                Preference.getInstance(ctx).put(Preference.Key.LOC_ALTITUDE,altitude);
-                Preference.getInstance(ctx).put(Preference.Key.LOC_ACCURACY,accuracy);
-                Preference.getInstance(ctx).put(Preference.Key.LOC_SPEED,speed);
-                Preference.getInstance(ctx).put(Preference.Key.LOC_BEARING,bearing);
-                Preference.getInstance(ctx).put(Preference.Key.LOC_HAS_ACCURACY,hasAccuracy);
-                Preference.getInstance(ctx).put(Preference.Key.LOC_HAS_ALTITUDE,hasAltitude);
-                Preference.getInstance(ctx).put(Preference.Key.LOC_HAS_SPEED,hasSpeed);
-                Preference.getInstance(ctx).put(Preference.Key.LOC_HAS_BEARING,hasBearing);
-                Preference.getInstance(ctx).put(Preference.Key.LOC_MOCK_PROVIDER,isFromMockProvider);
-                Preference.getInstance(ctx).put(Preference.Key.LOC_PROVIDER,provider);
-                Preference.getInstance(ctx).put(Preference.Key.LOC_ELAPSED_TIME,elapsedTime);
+                Preference.getInstance(ctx).put(Preference.Key.LOC_ALTITUDE, altitude);
+                Preference.getInstance(ctx).put(Preference.Key.LOC_ACCURACY, accuracy);
+                Preference.getInstance(ctx).put(Preference.Key.LOC_SPEED, speed);
+                Preference.getInstance(ctx).put(Preference.Key.LOC_BEARING, bearing);
+                Preference.getInstance(ctx).put(Preference.Key.LOC_HAS_ACCURACY, hasAccuracy);
+                Preference.getInstance(ctx).put(Preference.Key.LOC_HAS_ALTITUDE, hasAltitude);
+                Preference.getInstance(ctx).put(Preference.Key.LOC_HAS_SPEED, hasSpeed);
+                Preference.getInstance(ctx).put(Preference.Key.LOC_HAS_BEARING, hasBearing);
+                Preference.getInstance(ctx).put(Preference.Key.LOC_MOCK_PROVIDER, isFromMockProvider);
+                Preference.getInstance(ctx).put(Preference.Key.LOC_PROVIDER, provider);
+                Preference.getInstance(ctx).put(Preference.Key.LOC_ELAPSED_TIME, elapsedTime);
             }
         }
     }
@@ -114,21 +109,20 @@ public class FetchLocation implements GoogleApiClient.ConnectionCallbacks,
     private boolean checkPlayServices() {
         GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
         int resultCode = apiAvailability.isGooglePlayServicesAvailable(ctx);
-        if (resultCode != ConnectionResult.SUCCESS) {
-            if (apiAvailability.isUserResolvableError(resultCode)) {
+
+         /*   if (apiAvailability.isUserResolvableError(resultCode)) {
                 //apiAvailability.getErrorDialog(ctx., resultCode, PLAY_SERVICES_RESOLUTION_REQUEST).show();
             } else
-               // ctx.finish();
-
-            return false;
-        }
-        return true;
+               // ctx.finish();*/
+        return resultCode != ConnectionResult.SUCCESS;
     }
 
-    protected void startLocationUpdates() {
-        mLocationRequest = new LocationRequest();
+    private void startLocationUpdates() {
+        LocationRequest mLocationRequest = new LocationRequest();
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        long UPDATE_INTERVAL = 5000;
         mLocationRequest.setInterval(UPDATE_INTERVAL);
+        long FASTEST_INTERVAL = 5000;
         mLocationRequest.setFastestInterval(FASTEST_INTERVAL);
         if (ActivityCompat.checkSelfPermission(ctx, android.Manifest.permission.ACCESS_FINE_LOCATION) !=
                 PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(ctx,

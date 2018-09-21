@@ -29,7 +29,6 @@ public abstract class AbstractSensorModel {
     public static AbstractSensorModel getSensorModelByType(SensorType type, Context ctx) {
         switch (type) {
             case ACCELEROMETER:         return AccelerometerModel.getInstance(ctx);
-            case TEMPERATURE:           return TemperatureModel.getInstance();
             default:                    return null;
         }
     }

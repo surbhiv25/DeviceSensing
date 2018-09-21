@@ -17,14 +17,9 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
-import com.ezeia.devicesensing.receivers.ScreenReceiver;
 import com.ezeia.devicesensing.service.ForegroundService;
 import com.ezeia.devicesensing.utils.Constants;
 
@@ -35,58 +30,53 @@ import java.net.URL;
 
 import io.fabric.sdk.android.Fabric;
 
-import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
-import static android.Manifest.permission.CAMERA;
 import static android.Manifest.permission.READ_CALL_LOG;
 import static android.Manifest.permission.READ_CONTACTS;
-import static android.Manifest.permission.READ_LOGS;
 import static android.Manifest.permission.READ_PHONE_STATE;
 import static android.Manifest.permission.READ_SMS;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
+import static com.crashlytics.android.Crashlytics.log;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final int MY_PERMISSIONS_REQUEST_PACKAGE_USAGE_STATS = 100;
     private final int PERMISSION_REQUEST_CODE = 200;
-    Button forceCrash,btn_pushData;
-    TextView txt_message;
+    private TextView txt_message;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        //setContentView(R.layout.activity_main);
         Fabric.with(this, new Crashlytics());
 
         fillStats();
-        btnClick();
+        //btnClick();
         //LogsUtil.readLogs();
     }
 
-    private void btnClick(){
+    /*private void btnClick(){
 
         txt_message = findViewById(R.id.txt_message);
 
-        btn_pushData = findViewById(R.id.btn_pushData);
+        Button btn_pushData = findViewById(R.id.btn_pushData);
         btn_pushData.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                /*if(isNetworkAvailable()){
+                if(checkInternetConnection(MainActivity.this)){
                     txt_message.setText("");
-                    ScreenReceiver.startCreatingJSON(MainActivity.this,txt_message);
+                    MyTask task = new MyTask(MainActivity.this);
+                    task.execute();
                 }else{
-                    txt_message.setText("Please check your internet connection.");
-                }*/
-
-                MyTask task = new MyTask(MainActivity.this);
-                task.execute();
+                    txt_message.setText(R.string.internet_connection);
+                }
             }
         });
-    }
+    }*/
 
-    private static class MyTask extends AsyncTask<Void, Void, Boolean> {
+    static class MyTask extends AsyncTask<Void, Void, Boolean> {
 
-        private WeakReference<MainActivity> activityReference;
+        private final WeakReference<MainActivity> activityReference;
 
         // only retain a weak reference to the activity
         MyTask(MainActivity context) {
@@ -95,17 +85,17 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected Boolean doInBackground(Void... v) {
-            boolean success = false;
             try {
-                URL url = new URL("https://google.com");
-                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                connection.setConnectTimeout(10000);
-                connection.connect();
-                success = connection.getResponseCode() == 200;
+                HttpURLConnection urlc = (HttpURLConnection)(new URL("http://www.google.com").openConnection());
+                urlc.setRequestProperty("User-Agent", "Test");
+                urlc.setRequestProperty("Connection", "close");
+                urlc.setConnectTimeout(10000);
+                urlc.connect();
+                return (urlc.getResponseCode() == 200);
             } catch (IOException e) {
-                e.printStackTrace();
+                log("IOException in connectGoogle())");
+                return false;
             }
-            return success;
         }
 
         @Override
@@ -120,22 +110,20 @@ public class MainActivity extends AppCompatActivity {
             TextView textView = activity.findViewById(R.id.txt_message);
             if(aVoid){
                 textView.setText("");
-                ScreenReceiver.startCreatingJSON(activity,textView);
+                //ScreenReceiver.startCreatingJSON(activity,textView);
             }else{
-                textView.setText("Please check your internet connection.");
+                textView.setText(R.string.internet_connection);
             }
         }
     }
 
-    private boolean checkInternetConnection(Context context) {
+    public static boolean checkInternetConnection(Context context) {
         ConnectivityManager manager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo ni = manager.getActiveNetworkInfo();
+        NetworkInfo ni = null;
+        if(manager != null)
+            ni = manager.getActiveNetworkInfo();
 
-        if (ni != null && ni.getState() == NetworkInfo.State.CONNECTED) {
-            return true;
-        } else {
-            return false;
-        }
+        return ni != null && ni.getState() == NetworkInfo.State.CONNECTED;
     }
 
     private void fillStats()
@@ -149,11 +137,11 @@ public class MainActivity extends AppCompatActivity {
                 startIntent.setAction(Constants.ACTION.STARTFOREGROUND_ACTION);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     startForegroundService(startIntent);
-                    //finish();
+                    finish();
                 }
                 else {
                     startService(startIntent);
-                    //finish();
+                    finish();
                 }
             }
         }else{

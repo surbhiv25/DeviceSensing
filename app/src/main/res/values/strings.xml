@@ -1,9 +1,10 @@
 <resources>
     <string name="app_name">AgniDeviceSensing</string>
 
-    <string name="service_started">SERVICE STARTED</string>
     <string name="service_running">SERVICE RUNNING</string>
     <string name="allowPermission">You need to allow access to all the permissions</string>
     <string name="okButton">OK</string>
     <string name="cancelButton">Cancel</string>
+    <string name="push_data_to_kinesis">Push Data to Kinesis</string>
+    <string name="internet_connection">Please check your internet connection.</string>
 </resources>

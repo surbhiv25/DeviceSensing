@@ -44,7 +44,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        android:name=".ExampleApplication">
+        android:name=".LeakCanaryApp">
 
         <activity android:name=".MainActivity">
            <intent-filter>
@@ -61,8 +61,6 @@
         </receiver>
 
         <service android:name=".service.ForegroundService" />
-
-        <service android:name=".utils.Location.GPSTracker" />
 
         <meta-data
             android:name="io.fabric.ApiKey"

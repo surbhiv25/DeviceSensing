@@ -13,7 +13,6 @@ import android.widget.Toast;
 import com.crashlytics.android.Crashlytics;
 import com.ezeia.devicesensing.SqliteRoom.Database.AppDatabase;
 import com.ezeia.devicesensing.SqliteRoom.utils.DatabaseInitializer;
-import com.ezeia.devicesensing.service.ForegroundService;
 import com.ezeia.devicesensing.utils.CommonFunctions;
 import com.ezeia.devicesensing.utils.Functions;
 import com.google.gson.JsonArray;
@@ -34,10 +33,9 @@ public class WifiReceiver extends BroadcastReceiver {
         switch (WifiState) {
             case WifiManager.WIFI_STATE_ENABLED:
                 //Log.i(ForegroundService.LOG_TAG,"WIFI ON: "+ CommonFunctions.fetchDateInUTC());
-                getConnectedWifi("ON");
+                getConnectedWifi();
                 //Log.i(ForegroundService.LOG_TAG,"CONNECTED WIFI INFO: "+getConnectedWifi("ON"));
                 Toast.makeText(context,"Wifi ON", Toast.LENGTH_SHORT).show();
-
                 break;
 
             case WifiManager.WIFI_STATE_ENABLING:
@@ -49,7 +47,7 @@ public class WifiReceiver extends BroadcastReceiver {
                 //Log.i(ForegroundService.LOG_TAG,"CONNECTED WIFI INFO: "+getConnectedWifi());
                 Toast.makeText(context,"Wifi OFF", Toast.LENGTH_SHORT).show();
 
-                createJson("OFF");
+                createJson();
 
                 break;
 
@@ -64,37 +62,34 @@ public class WifiReceiver extends BroadcastReceiver {
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    private void getConnectedWifi(String wifiState)
+    private void getConnectedWifi()
     {
         WifiManager manager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-        StringBuffer bufferWifi =  new StringBuffer();
-        WifiInfo wifiInfo = manager.getConnectionInfo();
-        bufferWifi.append("BSSID: ").append(wifiInfo.getBSSID())
-                .append("\nSSID: ").append(wifiInfo.getSSID())
-                .append("\nSUPPLICANT STATE: ").append(wifiInfo.getSupplicantState())
-                .append("\nRSSI: ").append(wifiInfo.getRssi())
-                .append("\nMAC: ").append(wifiInfo.getMacAddress())
-                .append("\nLINK SPEED: ").append(wifiInfo.getLinkSpeed())
-                .append("\nFREQUENCY: ").append(wifiInfo.getFrequency())
-                .append("\nNET ID: ").append(wifiInfo.getNetworkId())
-                .append("\nHIDDEN SSID: ").append(wifiInfo.getHiddenSSID())
-                .append("\n\n");
+        WifiInfo wifiInfo;
+        JsonArray array = null;
+        JsonObject object = null;
+        if(manager != null)
+        {
+            wifiInfo = manager.getConnectionInfo();
+            if(wifiInfo != null)
+            {
+                object = new JsonObject();
+                array = new JsonArray();
+                object.addProperty("BSSID",wifiInfo.getBSSID());
+                object.addProperty("SSID",wifiInfo.getSSID());
+                object.addProperty("Supplicant State",String.valueOf(wifiInfo.getSupplicantState()));
+                object.addProperty("RSSI",wifiInfo.getRssi());
+                object.addProperty("Mac Address",wifiInfo.getMacAddress());
+                object.addProperty("Link Speed",wifiInfo.getLinkSpeed());
+                object.addProperty("Frequency",wifiInfo.getFrequency());
+                object.addProperty("Network ID",wifiInfo.getNetworkId());
+                object.addProperty("Hidden SSID",wifiInfo.getHiddenSSID());
+                array.add(object);
+            }
+        }
 
-        JsonObject object = new JsonObject();
-        JsonArray array = new JsonArray();
-        object.addProperty("BSSID",wifiInfo.getBSSID());
-        object.addProperty("SSID",wifiInfo.getSSID());
-        object.addProperty("Supplicant State",String.valueOf(wifiInfo.getSupplicantState()));
-        object.addProperty("RSSI",wifiInfo.getRssi());
-        object.addProperty("Mac Address",wifiInfo.getMacAddress());
-        object.addProperty("Link Speed",wifiInfo.getLinkSpeed());
-        object.addProperty("Frequency",wifiInfo.getFrequency());
-        object.addProperty("Network ID",wifiInfo.getNetworkId());
-        object.addProperty("Hidden SSID",wifiInfo.getHiddenSSID());
-
-        array.add(object);
         JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("state",wifiState);
+        jsonObject.addProperty("state","ON");
         jsonObject.addProperty("timestamp",CommonFunctions.fetchDateInUTC());
         jsonObject.add("connection",array);
 
@@ -103,17 +98,20 @@ public class WifiReceiver extends BroadcastReceiver {
         jsonObject.add("location",objectLoc);
         Log.i("LOCATION", "Location is..."+objectLoc.toString());
 
-        DatabaseInitializer.addData(AppDatabase.getAppDatabase(context),"WifiConnection",object.toString(),CommonFunctions.fetchDateInUTC());
+        if(object != null)
+            DatabaseInitializer.addData(AppDatabase.getAppDatabase(context),"WifiConnection",object.toString(),CommonFunctions.fetchDateInUTC());
+        else
+            DatabaseInitializer.addData(AppDatabase.getAppDatabase(context),"WifiConnection","NA",CommonFunctions.fetchDateInUTC());
     }
 
-    private void createJson(String pluggedState){
+    private void createJson(){
 
         Functions functions = new Functions(context);
         JsonObject objectLoc = functions.fetchLocation();
         Log.i("LOCATION", "Location is..."+objectLoc.toString());
 
         JsonObject object = new JsonObject();
-        object.addProperty("state",pluggedState);
+        object.addProperty("state","OFF");
         object.addProperty("timestamp",CommonFunctions.fetchDateInUTC());
         object.add("location",objectLoc);
         DatabaseInitializer.addData(AppDatabase.getAppDatabase(context),"WifiConnection",object.toString(),CommonFunctions.fetchDateInUTC());

@@ -1,31 +1,14 @@
 package com.ezeia.devicesensing.utils.CellTower;
 
 import android.content.Context;
-import android.os.Handler;
-import android.os.Looper;
 import android.telephony.PhoneStateListener;
 import android.telephony.SignalStrength;
-import android.telephony.TelephonyManager;
-import android.util.Log;
-import android.widget.Toast;
 
-import com.ezeia.devicesensing.LogsUtil;
-import com.ezeia.devicesensing.SqliteRoom.Database.AppDatabase;
-import com.ezeia.devicesensing.SqliteRoom.utils.DatabaseInitializer;
 import com.ezeia.devicesensing.pref.Preference;
-import com.ezeia.devicesensing.utils.CommonFunctions;
-import com.ezeia.devicesensing.utils.Functions;
-import com.google.gson.JsonObject;
-
-import java.util.Timer;
-import java.util.TimerTask;
-
-import static android.content.Context.TELEPHONY_SERVICE;
 
 public class CellTowerStateListener extends PhoneStateListener
 {
-    private Context ctx;
-    private Boolean quitLooper;
+    private final Context ctx;
 
     public CellTowerStateListener(Context ctx) {
         this.ctx = ctx;

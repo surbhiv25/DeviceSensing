@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/btn_pushData"
-        android:text="Push Data to Kinesis"
+        android:text="@string/push_data_to_kinesis"
         android:layout_centerInParent="true"/>
 
     <TextView

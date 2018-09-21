@@ -26,10 +26,18 @@ public abstract class AppDatabase extends RoomDatabase {
                             // allow queries on the main thread.
                             // Don't do this on a real app! See PersistenceBasicSample for an example.
                             .allowMainThreadQueries()
+                            //.addMigrations(FROM_1_TO_2)
                             .build();
         }
         return INSTANCE;
     }
+
+   /* static final Migration FROM_1_TO_2 = new Migration(1, 2) {
+        @Override
+        public void migrate(final SupportSQLiteDatabase database) {
+            database.execSQL("ALTER TABLE datafetch ADD COLUMN createdAt TEXT");
+        }
+    };*/
 
     public static void destroyInstance() {
         INSTANCE = null;

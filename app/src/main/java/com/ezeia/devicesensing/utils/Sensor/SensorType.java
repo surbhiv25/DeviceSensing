@@ -4,8 +4,7 @@ import android.hardware.Sensor;
 
 public enum SensorType {
 
-    ACCELEROMETER(Sensor.TYPE_ACCELEROMETER),
-    TEMPERATURE(Sensor.TYPE_AMBIENT_TEMPERATURE);
+    ACCELEROMETER(Sensor.TYPE_ACCELEROMETER);
 
     private final int sensorIdentifier;
 

@@ -15,7 +15,6 @@ class Sms {
     private String _reply_path_present;
     private String _subject;
     private String _service_center;
-    private String _body;
     private String _locked;
 
     public String getId(){
@@ -57,9 +56,6 @@ class Sms {
     public String getServiceCenter(){
         return _service_center;
     }
-    public String getBody(){
-        return _body;
-    }
     public String getLocked(){
         return _locked;
     }
@@ -99,9 +95,6 @@ class Sms {
     }
     public void setServiceCenter(String service_center){
         _service_center = service_center;
-    }
-    public void setBody(String body){
-        _body = body;
     }
     public void setLocked(String locked){
         _locked = locked;

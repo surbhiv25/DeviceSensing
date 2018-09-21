@@ -50,6 +50,8 @@ public class Preference {
         public static final String LOC_MOCK_PROVIDER = "is_mock_provider";
         public static final String LOC_PROVIDER = "provider";
         public static final String LOC_ELAPSED_TIME = "elapsed_time";
+
+        public static final String UNIQUE_ID = "unique_id";
     }
 
     private Preference(Context context) {
@@ -225,7 +227,7 @@ public class Preference {
         return isPackageNameEmpty() ? "" : getString(Key.PACKAGE_NAME);
     }
 
-    public boolean isDeviceInfoEmpty() {
+    private boolean isDeviceInfoEmpty() {
         return getBoolean(Key.IS_DEVICE_INFO);
     }
 
@@ -233,7 +235,7 @@ public class Preference {
         return !isDeviceInfoEmpty() && getBoolean(Key.IS_DEVICE_INFO);
     }
 
-    public boolean isWifiScanEmpty() {
+    private boolean isWifiScanEmpty() {
         return getBoolean(Key.IS_WIFI_SCANNED);
     }
 
@@ -241,28 +243,28 @@ public class Preference {
         return !isWifiScanEmpty() && getBoolean(Key.IS_WIFI_SCANNED);
     }
 
-    public boolean isAccXEmpty() {
+    private boolean isAccXEmpty() {
         return TextUtils.isEmpty(getString(Key.ACC_X));
     }
     public String getAccX() {
         return isAccXEmpty() ? "" : getString(Key.ACC_X);
     }
 
-    public boolean isAccYEmpty() {
+    private boolean isAccYEmpty() {
         return TextUtils.isEmpty(getString(Key.ACC_Y));
     }
     public String getAccY() {
         return isAccYEmpty() ? "" : getString(Key.ACC_Y);
     }
 
-    public boolean isAccZEmpty() {
+    private boolean isAccZEmpty() {
         return TextUtils.isEmpty(getString(Key.ACC_Z));
     }
     public String getAccZ() {
         return isAccZEmpty() ? "" : getString(Key.ACC_Z);
     }
 
-    public boolean isAccuracyEmpty() {
+    private boolean isAccuracyEmpty() {
         return TextUtils.isEmpty(getString(Key.ACCURACY));
     }
     public String getAccuracy() {
@@ -323,6 +325,10 @@ public class Preference {
     }
     public String getElapsedTime() {
         return getString(Key.LOC_ELAPSED_TIME);
+    }
+
+    public String getUniqueID() {
+        return getString(Key.UNIQUE_ID);
     }
 
 }

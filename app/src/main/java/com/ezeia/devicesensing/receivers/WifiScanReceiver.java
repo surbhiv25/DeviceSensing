@@ -7,11 +7,8 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
-import android.util.Log;
-import android.widget.Toast;
 
 import com.ezeia.devicesensing.pref.Preference;
-import com.ezeia.devicesensing.service.ForegroundService;
 
 import java.util.List;
 
@@ -22,11 +19,11 @@ public class WifiScanReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent)
     {
-        StringBuffer buffer = null;
+        //StringBuffer buffer = null;
         this.context = context;
         if (intent.getAction().equals(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)) {
             if(!Preference.getInstance(context).getWifiScanInfo()){
-                buffer = getWifiName();
+               // buffer = getWifiName();
                 Preference.getInstance(context).put(Preference.Key.IS_WIFI_SCANNED,true);
             }
         }

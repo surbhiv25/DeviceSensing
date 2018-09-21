@@ -5,13 +5,14 @@ import android.os.StrictMode;
 
 import com.squareup.leakcanary.LeakCanary;
 
-public class ExampleApplication extends Application {
+public class LeakCanaryApp extends Application {
+
     @Override public void onCreate() {
         super.onCreate();
         setupLeakCanary();
     }
 
-    protected void setupLeakCanary() {
+    private void setupLeakCanary() {
         enabledStrictMode();
         if (LeakCanary.isInAnalyzerProcess(this)) {
             // This process is dedicated to LeakCanary for heap analysis.

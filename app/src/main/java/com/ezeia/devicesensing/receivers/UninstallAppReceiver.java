@@ -9,7 +9,6 @@ import android.widget.Toast;
 import com.crashlytics.android.Crashlytics;
 import com.ezeia.devicesensing.SqliteRoom.Database.AppDatabase;
 import com.ezeia.devicesensing.SqliteRoom.utils.DatabaseInitializer;
-import com.ezeia.devicesensing.service.ForegroundService;
 import com.ezeia.devicesensing.utils.CommonFunctions;
 import com.ezeia.devicesensing.utils.Functions;
 import com.google.gson.JsonObject;
@@ -24,20 +23,22 @@ public class UninstallAppReceiver extends BroadcastReceiver {
         String act = intent.getAction();
         if (Intent.ACTION_PACKAGE_REMOVED.equals(act)) {
 
-            String packageName = intent.getData().getSchemeSpecificPart();
-            //Log.i(ForegroundService.LOG_TAG,"UNINSTALL APPLICATION PACKAGE: "+ packageName);
-            //Log.i(ForegroundService.LOG_TAG,"UNINSTALL APPLICATION: "+ CommonFunctions.fetchDateInUTC());
-            Toast.makeText(context,"Uninstall App", Toast.LENGTH_SHORT).show();
+            if(intent.getData() != null){
+                String packageName = intent.getData().getSchemeSpecificPart();
+                //Log.i(ForegroundService.LOG_TAG,"UNINSTALL APPLICATION PACKAGE: "+ packageName);
+                //Log.i(ForegroundService.LOG_TAG,"UNINSTALL APPLICATION: "+ CommonFunctions.fetchDateInUTC());
+                Toast.makeText(context,"Uninstall App", Toast.LENGTH_SHORT).show();
 
-            Functions functions = new Functions(context);
-            JsonObject objectLoc = functions.fetchLocation();
-            Log.i("LOCATION", "Location is..."+objectLoc.toString());
+                Functions functions = new Functions(context);
+                JsonObject objectLoc = functions.fetchLocation();
+                Log.i("LOCATION", "Location is..."+objectLoc.toString());
 
-            JsonObject object = new JsonObject();
-            object.addProperty("packageName",packageName);
-            object.addProperty("timestamp",CommonFunctions.fetchDateInUTC());
-            object.add("location",objectLoc);
-            DatabaseInitializer.addData(AppDatabase.getAppDatabase(context),"Uninstall",object.toString(),CommonFunctions.fetchDateInUTC());
+                JsonObject object = new JsonObject();
+                object.addProperty("packageName",packageName);
+                object.addProperty("timestamp",CommonFunctions.fetchDateInUTC());
+                object.add("location",objectLoc);
+                DatabaseInitializer.addData(AppDatabase.getAppDatabase(context),"Uninstall",object.toString(),CommonFunctions.fetchDateInUTC());
+            }
         }
     }
 }

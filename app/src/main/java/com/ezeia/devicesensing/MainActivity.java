@@ -2,6 +2,7 @@ package com.ezeia.devicesensing;
 
 import android.annotation.TargetApi;
 import android.app.AppOpsManager;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -41,6 +42,7 @@ import static com.crashlytics.android.Crashlytics.log;
 public class MainActivity extends AppCompatActivity {
 
     private static final int MY_PERMISSIONS_REQUEST_PACKAGE_USAGE_STATS = 100;
+    private static final int MY_PERMISSIONS_REQUEST_NOTIFICATION = 300;
     private final int PERMISSION_REQUEST_CODE = 200;
     private TextView txt_message;
 
@@ -126,24 +128,29 @@ public class MainActivity extends AppCompatActivity {
         return ni != null && ni.getState() == NetworkInfo.State.CONNECTED;
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        fillStats();
+    }
+
     private void fillStats()
     {
         if (hasPermission()){
 
-            if (!checkPermissionExtra()) {
-                requestPermissionExtra();
-            } else {
-                Intent startIntent = new Intent(MainActivity.this, ForegroundService.class);
-                startIntent.setAction(Constants.ACTION.STARTFOREGROUND_ACTION);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    startForegroundService(startIntent);
-                    finish();
+                if (!checkPermissionExtra()) {
+                    requestPermissionExtra();
+                } else {
+                    Intent startIntent = new Intent(MainActivity.this, ForegroundService.class);
+                    startIntent.setAction(Constants.ACTION.STARTFOREGROUND_ACTION);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        startForegroundService(startIntent);
+                        finish();
+                    } else {
+                        startService(startIntent);
+                        finish();
+                    }
                 }
-                else {
-                    startService(startIntent);
-                    finish();
-                }
-            }
         }else{
             requestPermission();
         }
@@ -235,6 +242,9 @@ public class MainActivity extends AppCompatActivity {
             case MY_PERMISSIONS_REQUEST_PACKAGE_USAGE_STATS:
                 fillStats();
                 break;
+            case MY_PERMISSIONS_REQUEST_NOTIFICATION:
+                fillStats();
+                break;
         }
     }
 
@@ -258,4 +268,17 @@ public class MainActivity extends AppCompatActivity {
 //                Manifest.permission.PACKAGE_USAGE_STATS) == PackageManager.PERMISSION_GRANTED;
     }
 
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP_MR1)
+    private void requestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            startActivityForResult(new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS), MY_PERMISSIONS_REQUEST_NOTIFICATION);
+        }
+    }
+
+    private boolean isNotificationServiceRunning() {
+        ContentResolver contentResolver = getContentResolver();
+        String enabledNotificationListeners = Settings.Secure.getString(contentResolver, "enabled_notification_listeners");
+        String packageName = getPackageName();
+        return enabledNotificationListeners != null && enabledNotificationListeners.contains(packageName);
+    }
 }

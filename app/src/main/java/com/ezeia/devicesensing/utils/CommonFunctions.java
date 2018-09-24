@@ -17,6 +17,8 @@ import android.provider.CallLog;
 import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
+import android.util.Log;
+
 import com.an.deviceinfo.device.model.Battery;
 import com.ezeia.devicesensing.SqliteRoom.Database.AppDatabase;
 import com.ezeia.devicesensing.SqliteRoom.utils.DatabaseInitializer;
@@ -192,10 +194,10 @@ public class CommonFunctions {
                     objSms.setId(c.getString(c.getColumnIndexOrThrow("thread_id")));
 
                     JsonObject person = new JsonObject();
-                    //person.addProperty("Address", "DemoAddress+123");
-                    //person.addProperty("Body","Hi this is a demo msg.");
-                    person.addProperty("Address", objSms.getAddress());
-                    person.addProperty("Body", objSms.getMsg());
+                    person.addProperty("Address", "DemoAddress+123");
+                    person.addProperty("Body","Hi this is a demo msg.");
+                    //person.addProperty("Address", objSms.getAddress());
+                    //person.addProperty("Body", objSms.getMsg());
                     person.addProperty("Date", objSms.getTime());
                     person.addProperty("Locked", objSms.getLocked());
                     person.addProperty("Person", objSms.getPerson());
@@ -357,14 +359,14 @@ public class CommonFunctions {
                         break;
                 }
                 JsonObject person = new JsonObject();
-                //person.addProperty("Phone Number","9874561230");
-                person.addProperty("Phone Number",phNumber);
+                person.addProperty("Phone Number","9874561230");
+                //person.addProperty("Phone Number",phNumber);
                 person.addProperty("Call Type",dir);
                 person.addProperty("Call Date",String.valueOf(callDayTime));
                 person.addProperty("Call duration in sec",callDuration);
                 person.addProperty("Call ID",callID);
-                //person.addProperty("Contact Name","XYZ");
-                person.addProperty("Contact Name",phName);
+                person.addProperty("Contact Name","XYZ");
+                //person.addProperty("Contact Name",phName);
                 person.addProperty("Contact label",label);
                 person.addProperty("Call Num Type",numType);
                 jsonArray.add(person);
@@ -434,13 +436,13 @@ public class CommonFunctions {
 
                             JsonObject person = new JsonObject();
                             person.addProperty("ID", ID);
-                            person.addProperty("Name", name);
-                            person.addProperty("Data 1", data1);
-                            //person.addProperty("Name", "XYZ");
-                            //person.addProperty("Data 1", "7894561230");
+                            //person.addProperty("Name", name);
+                            //person.addProperty("Data 1", data1);
+                            person.addProperty("Name", "XYZ");
+                            person.addProperty("Data 1", "7894561230");
                             person.addProperty("Data 2", data2);
-                            person.addProperty("Data 4", data4);
-                            //person.addProperty("Data 4", "7894561230");
+                            //person.addProperty("Data 4", data4);
+                            person.addProperty("Data 4", "7894561230");
                             person.addProperty("Is Primary", isPrimary);
                             person.addProperty("Is Super Primary", isSuperPrimary);
                             person.addProperty("Raw Contact ID", rawContactID);

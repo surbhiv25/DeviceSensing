@@ -40,6 +40,13 @@ class KinesisUploadTest extends AsyncTask<Void,Void,Boolean>{
             Log.i("TAG", "kinesis.submitAll failed");
             Log.i("TAG",ace.getMessage()+"---"+ace.getCause());
             return true;
+        } catch (Exception ace) {
+            Answers.getInstance().logCustom(new CustomEvent("AWS Called...DoInBackground")
+                    .putCustomAttribute("Exception",ace.getCause().toString()));
+
+            Log.i("TAG", "kinesis.submitAll failed");
+            Log.i("TAG",ace.getMessage()+"---"+ace.getCause());
+            return true;
         }
         return false;
     }

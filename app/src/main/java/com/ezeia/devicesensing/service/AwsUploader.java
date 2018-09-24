@@ -9,6 +9,8 @@ import com.amazonaws.auth.CognitoCachingCredentialsProvider;
 import com.amazonaws.mobileconnectors.kinesis.kinesisrecorder.KinesisFirehoseRecorder;
 import com.amazonaws.regions.Regions;
 import com.crashlytics.android.Crashlytics;
+import com.crashlytics.android.answers.Answers;
+import com.crashlytics.android.answers.CustomEvent;
 import com.ezeia.devicesensing.R;
 import com.ezeia.devicesensing.SqliteRoom.Database.AppDatabase;
 import com.ezeia.devicesensing.SqliteRoom.utils.DatabaseInitializer;
@@ -170,9 +172,24 @@ public class AwsUploader implements NetworkConnection.ResultListener {
                     firehoseRecorder.saveRecord(newLineAdd, kinesisStreamName);
                     isSaved = true;
                     Log.i("TAG","SUCCESSFULLY SAVING....");
+                    Answers.getInstance().logCustom(new CustomEvent("Data Saving")
+                            .putCustomAttribute("Exception","Saved"));
+
                 } catch (AmazonClientException e) {
                     isSaved = false;
                     Log.i("TAG","ERROR IN SAVING...."+e);
+                    Answers.getInstance().logCustom(new CustomEvent("Data Saving")
+                            .putCustomAttribute("Exception",e.getMessage()));
+                } catch (IllegalArgumentException e) {
+                    isSaved = false;
+                    Log.i("TAG","ERROR IN SAVING...."+e);
+                    Answers.getInstance().logCustom(new CustomEvent("Data Saving")
+                            .putCustomAttribute("Exception",e.getMessage()));
+                } catch (Exception e) {
+                    isSaved = false;
+                    Log.i("TAG","ERROR IN SAVING...."+e);
+                    Answers.getInstance().logCustom(new CustomEvent("Data Saving")
+                            .putCustomAttribute("Exception",e.getMessage()));
                 }
 
                 if (isSaved) {

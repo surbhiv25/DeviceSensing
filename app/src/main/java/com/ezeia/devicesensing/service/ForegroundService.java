@@ -180,9 +180,8 @@ public class ForegroundService extends Service implements SensorEventListener {
         DatabaseInitializer.deleteProbe(AppDatabase.getAppDatabase(ctx),"FINAL_JSON");
        */
 
-        DatabaseInitializer.deleteAllData(AppDatabase.getAppDatabase(ctx));
-
-        Preference.getInstance(ctx).clear();
+        //DatabaseInitializer.deleteAllData(AppDatabase.getAppDatabase(ctx));
+        //Preference.getInstance(ctx).clear();
 
         IntentFilter filterBluetooth = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
         filterBluetooth.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
@@ -537,6 +536,7 @@ public class ForegroundService extends Service implements SensorEventListener {
     }
 
     @Override
+
     public void onAccuracyChanged(Sensor sensor, int i) { }
 
 }

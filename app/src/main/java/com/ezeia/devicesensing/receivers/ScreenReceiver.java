@@ -57,14 +57,11 @@ public class ScreenReceiver extends BroadcastReceiver{
                 }, 30000);
 
                 Log.i(ForegroundService.LOG_TAG,"SCREEN OFF: "+ CommonFunctions.fetchDateInUTC());
-                //Toast.makeText(context,"SCREEN OFF",Toast.LENGTH_SHORT).show();
-
             } else if (intent.getAction().equals(Intent.ACTION_SCREEN_ON)) {
                 Toast.makeText(context, "Screen ON", Toast.LENGTH_SHORT).show();
                 Preference.getInstance(ctx).put(Preference.Key.IS_REPORT_SENT,false);
                 Preference.getInstance(context).put(Preference.Key.SCREEN_ON_TIME,CommonFunctions.fetchDateInUTC());
                 Log.i(ForegroundService.LOG_TAG,"SCREEN ON: "+ CommonFunctions.fetchDateInUTC());
-                //Toast.makeText(context,"SCREEN ON",Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -135,12 +132,12 @@ public class ScreenReceiver extends BroadcastReceiver{
             JSONArray jsonObjLocation = DatabaseInitializer.fetchJsonArray(AppDatabase.getAppDatabase(ctx),"Location");
             JSONArray jsonObjBatteryPlug = DatabaseInitializer.fetchJsonArray(AppDatabase.getAppDatabase(ctx),"BatteryPlug");
             JSONArray jsonObjAccounts = DatabaseInitializer.fetchJsonArray(AppDatabase.getAppDatabase(ctx),"Accounts");
-            JSONArray jsonObjAudio = DatabaseInitializer.fetchJsonArray(AppDatabase.getAppDatabase(ctx),"AudioFiles");
-            JSONArray jsonObjVideo = DatabaseInitializer.fetchJsonArray(AppDatabase.getAppDatabase(ctx),"VideoFiles");
-            JSONArray jsonObjImage = DatabaseInitializer.fetchJsonArray(AppDatabase.getAppDatabase(ctx),"ImageFiles");
-            JSONArray jsonObjCall = DatabaseInitializer.fetchJsonArray(AppDatabase.getAppDatabase(ctx),"CallLogs");
-            JSONArray jsonObjSms = DatabaseInitializer.fetchJsonArray(AppDatabase.getAppDatabase(ctx),"SMS");
-            JSONArray jsonObjContact = DatabaseInitializer.fetchJsonArray(AppDatabase.getAppDatabase(ctx),"Contacts");
+            //JSONArray jsonObjAudio = DatabaseInitializer.fetchJsonArray(AppDatabase.getAppDatabase(ctx),"AudioFiles");
+            //JSONArray jsonObjVideo = DatabaseInitializer.fetchJsonArray(AppDatabase.getAppDatabase(ctx),"VideoFiles");
+            //JSONArray jsonObjImage = DatabaseInitializer.fetchJsonArray(AppDatabase.getAppDatabase(ctx),"ImageFiles");
+            //JSONArray jsonObjCall = DatabaseInitializer.fetchJsonArray(AppDatabase.getAppDatabase(ctx),"CallLogs");
+            //JSONArray jsonObjSms = DatabaseInitializer.fetchJsonArray(AppDatabase.getAppDatabase(ctx),"SMS");
+            //JSONArray jsonObjContact = DatabaseInitializer.fetchJsonArray(AppDatabase.getAppDatabase(ctx),"Contacts");
             JSONObject jsonObjBattery = DatabaseInitializer.fetchJsonData(AppDatabase.getAppDatabase(ctx),"Battery");
             JSONObject jsonObjRAM = DatabaseInitializer.fetchJsonData(AppDatabase.getAppDatabase(ctx),"RAM");
             JSONObject jsonObjInternal = DatabaseInitializer.fetchJsonData(AppDatabase.getAppDatabase(ctx),"Internal");
@@ -162,12 +159,12 @@ public class ScreenReceiver extends BroadcastReceiver{
             object.put("Location",jsonObjLocation);
             object.put("Battery_Charging_State",jsonObjBatteryPlug);
             object.put("Accounts",jsonObjAccounts);
-            object.put("Audio_Files",jsonObjAudio);
-            object.put("Video_Files",jsonObjVideo);
-            object.put("Image_Files",jsonObjImage);
-            object.put("Call_Logs",jsonObjCall);
-            object.put("SMS",jsonObjSms);
-            object.put("Contacts",jsonObjContact);
+            //object.put("Audio_Files",jsonObjAudio);
+            //object.put("Video_Files",jsonObjVideo);
+            //object.put("Image_Files",jsonObjImage);
+            //object.put("Call_Logs",jsonObjCall);
+            //object.put("SMS",jsonObjSms);
+            //object.put("Contacts",jsonObjContact);
             object.put("Battery",jsonObjBattery);
             object.put("RAM Storage",jsonObjRAM);
             object.put("Internal Storage",jsonObjInternal);

@@ -2,7 +2,6 @@ package com.ezeia.devicesensing.service;
 
 import android.content.Context;
 import android.util.Log;
-
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.CognitoCachingCredentialsProvider;
@@ -15,15 +14,10 @@ import com.ezeia.devicesensing.R;
 import com.ezeia.devicesensing.SqliteRoom.Database.AppDatabase;
 import com.ezeia.devicesensing.SqliteRoom.utils.DatabaseInitializer;
 import com.ezeia.devicesensing.pref.Preference;
-import com.ezeia.devicesensing.utils.Constants;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-
 import io.fabric.sdk.android.Fabric;
 
 public class AwsUploader implements NetworkConnection.ResultListener {
@@ -67,7 +61,6 @@ public class AwsUploader implements NetworkConnection.ResultListener {
         String newLineAdd;
         try {
             //jsonList = DatabaseInitializer.fetchFinalJsonData(AppDatabase.getAppDatabase(ctx));
-            if(jsonList != null && jsonList.size() >0){
                 for(String data: jsonList){
                     uniqueID = DatabaseInitializer.fetchPrimaryID(AppDatabase.getAppDatabase(ctx),data);
                     if(Preference.getInstance(ctx) != null){
@@ -89,28 +82,12 @@ public class AwsUploader implements NetworkConnection.ResultListener {
                         Log.i("SUBSTRING JSON", finalObject.toString().substring(start, end));
                     }
                 }
-            }else{
-                finalObject = new JSONObject();
-                newLineAdd = finalObject.toString() + "\n";
-                firehoseRecorder.saveRecord(newLineAdd, kinesisStreamName);
-
-                AwsUploader uploader = new AwsUploader(ctx);
-                NetworkConnection connection = new NetworkConnection(uploader);
-                connection.execute();
-
-                int maxLogSize = 1000;
-                for (int i = 0; i <= finalObject.toString().length() / maxLogSize; i++) {
-                    int start = i * maxLogSize;
-                    int end = (i + 1) * maxLogSize;
-                    end = end > finalObject.toString().length() ? finalObject.toString().length() : end;
-                    Log.i("SUBSTRING JSON", finalObject.toString().substring(start, end));
-                }
-            }
         } catch (JSONException e) {
             e.printStackTrace();
         }
     }
 
+    //will not be called for now
     @Override
     public void isInternetConnected(Boolean aVoid) {
 
@@ -118,11 +95,7 @@ public class AwsUploader implements NetworkConnection.ResultListener {
             if(Preference.getInstance(ctx) != null){
                 uniqueID = Preference.getInstance(ctx).getUniqueID();
             }
-
-            //KinesisUpload task = new KinesisUpload(ctx,firehoseRecorder);
-            //task.execute(uniqueID);
-
-            KinesisUploadTest task = new KinesisUploadTest(ctx,firehoseRecorder);
+            KinesisUploadTest task = new KinesisUploadTest(firehoseRecorder);
             task.execute();
         }else{
             //String[] probeList = Constants.probeList;
@@ -139,21 +112,6 @@ public class AwsUploader implements NetworkConnection.ResultListener {
                     Preference.Key.LOC_HAS_BEARING,Preference.Key.LOC_HAS_SPEED,Preference.Key.LOC_MOCK_PROVIDER,
                     Preference.Key.LOC_PROVIDER,Preference.Key.LOC_ELAPSED_TIME);
         }
-    }
-
-    /**
-     * Save a record in Kinesis Firehose client (will not send cloud-side yet)
-     *
-     * @param put_string
-     */
-    public void saveFirehoseRecord(String put_string) {
-        String firehoseStreamName = ctx.getString(R.string.kinesis_stream_name);
-          /*  json.accumulate("time", sdf.format(new Date()));
-            json.accumulate("model", Build.MODEL);
-            json.accumulate("message", put_string);
-            Log.e("TAG", json.toString());*/
-
-            firehoseRecorder.saveRecord(put_string, firehoseStreamName);
     }
 
     public void submitKinesisRecordTest() {
@@ -204,13 +162,9 @@ public class AwsUploader implements NetworkConnection.ResultListener {
                             Preference.Key.LOC_HAS_BEARING, Preference.Key.LOC_HAS_SPEED, Preference.Key.LOC_MOCK_PROVIDER,
                             Preference.Key.LOC_PROVIDER, Preference.Key.LOC_ELAPSED_TIME);
 
-                    KinesisUploadTest task = new KinesisUploadTest(ctx, firehoseRecorder);
+                    KinesisUploadTest task = new KinesisUploadTest(firehoseRecorder);
                     task.execute();
                 }
-
-               /* AwsUploader uploader = new AwsUploader(ctx);
-                NetworkConnection connection = new NetworkConnection(uploader);
-                connection.execute();*/
 
                 int maxLogSize = 1000;
                 for (int i = 0; i <= finalObject.toString().length() / maxLogSize; i++) {

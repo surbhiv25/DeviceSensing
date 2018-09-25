@@ -3,9 +3,11 @@ package com.ezeia.devicesensing.utils.Location;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.widget.Toast;
@@ -70,6 +72,7 @@ public class FetchLocation implements GoogleApiClient.ConnectionCallbacks,
 
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     @Override
     public void onLocationChanged(Location location) {
         if(location!=null) {
@@ -106,16 +109,11 @@ public class FetchLocation implements GoogleApiClient.ConnectionCallbacks,
         }
     }
 
-    private boolean checkPlayServices() {
+   /* private boolean checkPlayServices() {
         GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
         int resultCode = apiAvailability.isGooglePlayServicesAvailable(ctx);
-
-         /*   if (apiAvailability.isUserResolvableError(resultCode)) {
-                //apiAvailability.getErrorDialog(ctx., resultCode, PLAY_SERVICES_RESOLUTION_REQUEST).show();
-            } else
-               // ctx.finish();*/
         return resultCode != ConnectionResult.SUCCESS;
-    }
+    }*/
 
     private void startLocationUpdates() {
         LocationRequest mLocationRequest = new LocationRequest();

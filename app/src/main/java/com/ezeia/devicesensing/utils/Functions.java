@@ -55,40 +55,31 @@ public class Functions
         hmapDevice.put("Device MAC",deviceMAC);
 
         createJsonReportDeviceInfo(hmapDevice,serviceProvider);
-
-        Log.d(Constants.TAG,"VERSION: "+version+" MODEL: "+model);
-        Log.d(Constants.TAG,"ANDROID ID: "+androidID);
-        Log.d(Constants.TAG,"DEVICE MAC ADDRESS: "+deviceMAC);
-        Log.d(Constants.TAG,"SERVICE PROVIDER:\n "+serviceProvider);
     }
 
     public void collectedUponUsage()
     {
         // 1. Screen On/Off Broadcast done
         // 2. App Install/Uninstall Broadcast done
-        // 3. App Open Close **
-        // 4. Crash **
-        // 5. Accelerometer Sensor (add)
-        // 6. Temp sensor (add)
-        // 7. Proximity sensor (not imp)
-        // 8. Bluetooth
-        // 9. wifi
-        // 10. cell tower connection Broadcast
-        // 11. Accounts
-        // 12. Audio
-        // 13. Video
-        // 14. Image
-        // 15. Call
-        // 16. Sms
-        // 17. Front/back camera **
+        // 3. App Open Close
+        // 4. Accelerometer Sensor
+        // 5. Bluetooth
+        // 6. wifi
+        // 7. cell tower connection Broadcast
+        // 8. Accounts
+        // 9. Audio
+        // 10. Video
+        // 11. Image
+        // 12. Call
+        // 13. Sms
 
         CommonFunctions.getAccountInfo(ctx);
-        getAudioFilesInfo();
-        getVideoFilesInfo(ctx);
-        getImagesFilesInfo();
-        CommonFunctions.getCallDetails(ctx);
-        CommonFunctions.getAllSms(ctx);
-        CommonFunctions.getContactList(ctx);
+        //getAudioFilesInfo();
+        //getVideoFilesInfo(ctx);
+        //getImagesFilesInfo();
+        //CommonFunctions.getCallDetails(ctx);
+        //CommonFunctions.getAllSms(ctx);
+        //CommonFunctions.getContactList(ctx);
     }
 
     public void collectedWithActivity()
@@ -187,16 +178,9 @@ public class Functions
         Log.i("LOCATION", "Location is..."+objectLoc.toString());
 
         DatabaseInitializer.addData(AppDatabase.getAppDatabase(ctx),"CellTower",object.toString(),CommonFunctions.fetchDateInUTC());
-
     }
 
-    public void collectedWithReport()
-    {
-        // 1. Memory usage
-        // 2. battery (add)
-        // 3. cpu utilization (add)
-        // 4. time
-
+    public void collectCellTowerData(){
         TelephonyManager mTelephonyManager = (TelephonyManager) ctx.getSystemService(TELEPHONY_SERVICE);
         if(mTelephonyManager != null)
             mTelephonyManager.listen(new CellTowerStateListener(ctx), PhoneStateListener.LISTEN_SIGNAL_STRENGTHS);
@@ -221,6 +205,12 @@ public class Functions
                 });
             }
         }, 0, 60000);
+    }
+
+    public void collectedWithReport()
+    {
+        // 1. Memory usage
+        // 2. battery
 
         long totalRamValue = CommonFunctions.totalRamMemorySize(ctx);
         long freeRamValue = CommonFunctions.freeRamMemorySize(ctx);

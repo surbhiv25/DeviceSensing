@@ -46,15 +46,10 @@ import com.ezeia.devicesensing.utils.CommonFunctions;
 import com.ezeia.devicesensing.utils.Constants;
 import com.ezeia.devicesensing.utils.Functions;
 import com.ezeia.devicesensing.utils.Location.FetchLocation;
-import com.ezeia.devicesensing.utils.Sensor.SensorController;
-import com.ezeia.devicesensing.utils.Sensor.SensorModel.AbstractSensorModel;
-import com.ezeia.devicesensing.utils.Sensor.SensorType;
 import com.google.gson.JsonObject;
 import com.rvalerio.fgchecker.AppChecker;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Calendar;
-import java.util.List;
 import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -73,19 +68,11 @@ public class ForegroundService extends Service implements SensorEventListener {
     private UninstallAppReceiver uninstallAppReceiver;
     private ScreenReceiver screenReceiver;
     private AirplaneModeReceiver airplaneModeReceiver;
-
     private AppChecker appChecker;
     private Context ctx;
-
-    private SensorController mSensorController;
-    private List<SensorType> mSensorTypes;
     private SensorManager sensorManager = null;
-    private static Timer timer = new Timer();
-
     private Boolean isIntervalDone = false;
-
     private static final String PRIMARY_NOTIF_CHANNEL = "default";
-
 
     @Override
     public void onCreate() {
@@ -93,10 +80,6 @@ public class ForegroundService extends Service implements SensorEventListener {
         ctx = this;
         Fabric.with(this, new Crashlytics());
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        Context context = getApplicationContext();
-        mSensorController = new SensorController(sensorManager, context);
-        mSensorController.setup();
-        mSensorTypes = Arrays.asList(SensorType.values());
 
         createNotificationService();
         callReceivers();
@@ -104,21 +87,11 @@ public class ForegroundService extends Service implements SensorEventListener {
 
         Functions functions = new Functions(this);
         //functions.primaryKeyData();
-
-        //if(!Preference.getInstance(ctx).getBoolean(Preference.Key.IS_DEVICE_INFO)){
-            //functions.collectedUponChange();
-        //}
-
         functions.collectedUponUsage();
-        functions.collectedWithActivity();
-        functions.collectedWithReport();
+        //functions.collectedWithActivity();
+        functions.collectCellTowerData();
 
-       /* if(hasPermission())
-        {
-            functions.fetchUSageStats(this);
-        }*/
-
-        FetchLocation loc = new FetchLocation(this);
+        new FetchLocation(this);
     }
 
     private void createNotificationService(){
@@ -131,18 +104,12 @@ public class ForegroundService extends Service implements SensorEventListener {
 
         RemoteViews notificationView = new RemoteViews(this.getPackageName(), R.layout.notification);
 
-        // And now, building and attaching the Play button.
-        //Intent buttonPlayIntent = new Intent(this, BTStateChangedReceiver.class);
-
-        //Bitmap icon = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             setupChannel();
         }
 
         Notification notification = new NotificationCompat.Builder(this, PRIMARY_NOTIF_CHANNEL)
                 .setSmallIcon(R.mipmap.ic_launcher)
-                //.setLargeIcon(Bitmap.createScaledBitmap(icon, 128, 128, false))
                 .setColor(Color.parseColor("#00f6d8"))
                 .setContent(notificationView)
                 .setPriority(Notification.PRIORITY_MIN)
@@ -154,35 +121,6 @@ public class ForegroundService extends Service implements SensorEventListener {
     private void callReceivers(){
         //register BroadcastReceiver
 
-        /*DatabaseInitializer.deleteProbe(AppDatabase.getAppDatabase(ctx),"DeviceInfo");
-        DatabaseInitializer.deleteProbe(AppDatabase.getAppDatabase(ctx),"Install");
-        DatabaseInitializer.deleteProbe(AppDatabase.getAppDatabase(ctx),"Uninstall");
-        DatabaseInitializer.deleteProbe(AppDatabase.getAppDatabase(ctx),"AppUsage");
-        DatabaseInitializer.deleteProbe(AppDatabase.getAppDatabase(ctx),"Sensor");
-        DatabaseInitializer.deleteProbe(AppDatabase.getAppDatabase(ctx),"Bluetooth_State");
-        DatabaseInitializer.deleteProbe(AppDatabase.getAppDatabase(ctx),"Bluetooth_Connection");
-        DatabaseInitializer.deleteProbe(AppDatabase.getAppDatabase(ctx),"WifiConnection");
-        DatabaseInitializer.deleteProbe(AppDatabase.getAppDatabase(ctx),"Airplane");
-        DatabaseInitializer.deleteProbe(AppDatabase.getAppDatabase(ctx),"Accounts");
-        DatabaseInitializer.deleteProbe(AppDatabase.getAppDatabase(ctx),"AudioFiles");
-        DatabaseInitializer.deleteProbe(AppDatabase.getAppDatabase(ctx),"ImageFiles");
-        DatabaseInitializer.deleteProbe(AppDatabase.getAppDatabase(ctx),"VideoFiles");
-        DatabaseInitializer.deleteProbe(AppDatabase.getAppDatabase(ctx),"SMS");
-        DatabaseInitializer.deleteProbe(AppDatabase.getAppDatabase(ctx),"CallLogs");
-        DatabaseInitializer.deleteProbe(AppDatabase.getAppDatabase(ctx),"Contacts");
-        DatabaseInitializer.deleteProbe(AppDatabase.getAppDatabase(ctx),"Battery");
-        DatabaseInitializer.deleteProbe(AppDatabase.getAppDatabase(ctx),"RAM");
-        DatabaseInitializer.deleteProbe(AppDatabase.getAppDatabase(ctx),"Internal");
-        DatabaseInitializer.deleteProbe(AppDatabase.getAppDatabase(ctx),"External");
-        DatabaseInitializer.deleteProbe(AppDatabase.getAppDatabase(ctx),"CellTower");
-        DatabaseInitializer.deleteProbe(AppDatabase.getAppDatabase(ctx),"Location");
-        DatabaseInitializer.deleteProbe(AppDatabase.getAppDatabase(ctx),"BatteryPlug");
-        DatabaseInitializer.deleteProbe(AppDatabase.getAppDatabase(ctx),"FINAL_JSON");
-       */
-
-        //DatabaseInitializer.deleteAllData(AppDatabase.getAppDatabase(ctx));
-        //Preference.getInstance(ctx).clear();
-
         IntentFilter filterBluetooth = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
         filterBluetooth.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
         bluetoothReceiver = new BTStateChangedReceiver();
@@ -190,14 +128,6 @@ public class ForegroundService extends Service implements SensorEventListener {
 
         powerReceiver = new PowerReceiver();
         registerReceiver(powerReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
-
-      /*  CameraEventReceiver cameraEventReceiver = new CameraEventReceiver();
-        IntentFilter filterCamera = new IntentFilter();
-        //filterCamera.addAction(android.hardware.Camera.ACTION_NEW_PICTURE);
-        filterCamera.addAction(Intent.ACTION_CAMERA_BUTTON);
-        filterCamera.addCategory("android.intent.category.DEFAULT");
-        filterCamera.addDataType("image/*");
-        registerReceiver(cameraEventReceiver,filterCamera);*/
 
         locationReceiver = new LocationReceiver();
         registerReceiver(locationReceiver, new IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION));
@@ -262,18 +192,17 @@ public class ForegroundService extends Service implements SensorEventListener {
         if(acc)
         {
             Sensor mAccelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-            mSensorController.registerListener(ForegroundService.this, mAccelerometer);
+            sensorManager.registerListener(ForegroundService.this, mAccelerometer,SensorManager.SENSOR_DELAY_NORMAL);
 
-            SensorType sensorType = mSensorTypes.get(0);
+           /* SensorType sensorType = mSensorTypes.get(0);
             AbstractSensorModel sensorModel = AbstractSensorModel.getSensorModelByType(sensorType,ctx);
-
             if(sensorModel != null){
                 if (sensorModel.isActive()) {
                     sensorModel.setActive(false);
                 } else {
                     sensorModel.setActive(true);
                 }
-            }
+            }*/
         }
         else
         {
@@ -327,31 +256,7 @@ public class ForegroundService extends Service implements SensorEventListener {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId)
     {
-       /* final Handler handler = new Handler(Looper.getMainLooper());
-        handler.postDelayed(new Runnable() {
-            public void run() {
-            StringBuilder builder = LogsUtil.readCrashLogs();
-            Log.i("LOGSS",builder.toString());
-            if(builder.toString().contains("com.example.workmanagerdemo")){
-                Toast.makeText(getApplicationContext(),"FOUND LOG",Toast.LENGTH_SHORT).show();
-                Log.i("CRASH LOG",builder.toString());
-            }
-            }
-        }, 1000);*/
-
-        //if (intent.getAction().equals(Constants.ACTION.STARTFOREGROUND_ACTION)) {
-
-            //Log.i(LOG_TAG, "Received Start Foreground Intent ");
-
-            //-------------------
-      //  createNotificationService();
-      /*  }
-        else if (intent.getAction().equals(Constants.ACTION.STOPFOREGROUND_ACTION)) {
-            Toast.makeText(this,"Stop Service",Toast.LENGTH_SHORT).show();
-            Log.i(LOG_TAG, "Received Stop Foreground Intent");
-            stopForeground(true);
-            stopSelf();
-        }*/
+        //moved creating notification from here to onCreate()
         return START_REDELIVER_INTENT;
     }
 
@@ -361,7 +266,7 @@ public class ForegroundService extends Service implements SensorEventListener {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             chan1 = new NotificationChannel(
                     PRIMARY_NOTIF_CHANNEL,
-                    "default",
+                    PRIMARY_NOTIF_CHANNEL,
                     NotificationManager.IMPORTANCE_NONE);
 
             chan1.setLightColor(Color.TRANSPARENT);
@@ -371,27 +276,6 @@ public class ForegroundService extends Service implements SensorEventListener {
                 notificationManager.createNotificationChannel(chan1);
         }
     }
-
-    public void initializeTimerTask() {
-
-        Timer timer = new Timer();
-        final Handler handler = new Handler();
-        TimerTask timerTask = new TimerTask() {
-            public void run() {
-                handler.post(new Runnable() {
-                    public void run() {
-                      /*  StringBuilder builder = LogsUtil.readCrashLogs();
-                        if(builder.toString().contains("com.example.workmanagerdemo")){
-                            //Toast.makeText(getApplicationContext(),"FOUND LOG",Toast.LENGTH_SHORT).show();
-                            Log.i("CRASH LOG",builder.toString());
-                        }*/
-                    }
-                });
-            }
-        };
-        timer.schedule(timerTask, 1000, 1000); //
-    }
-
 
     private void startChecker() {
         appChecker = new AppChecker();
@@ -413,7 +297,6 @@ public class ForegroundService extends Service implements SensorEventListener {
                             Preference.getInstance(ctx).put(Preference.Key.START_TIME, getCurrentTime());
                             //Log.i(ForegroundService.LOG_TAG,"FOREGROUND APP NAME: "+ packageName);
                             //Log.i(ForegroundService.LOG_TAG,"FOREGROUND APP START TIME: "+ getCurrentTime());
-
                            // Toast.makeText(getBaseContext(), "Foreground: " + packageName, Toast.LENGTH_SHORT).show();
                         }
                         else {
@@ -432,7 +315,6 @@ public class ForegroundService extends Service implements SensorEventListener {
                                 Preference.getInstance(ctx).put(Preference.Key.START_TIME, getCurrentTime());
                                 //Log.i(ForegroundService.LOG_TAG,"FOREGROUND APP NAME: "+ packageName);
                                 //Log.i(ForegroundService.LOG_TAG,"FOREGROUND APP START TIME: "+ getCurrentTime());
-
                                 //Toast.makeText(getBaseContext(), "Foreground: " + packageName, Toast.LENGTH_SHORT).show();
                             }
                         }
@@ -464,7 +346,7 @@ public class ForegroundService extends Service implements SensorEventListener {
         subItems.addProperty("start_Time",startTime);
         subItems.addProperty("close_Time",closeTime);
         subItems.add("location",objectLoc);
-        Log.i("APP USAGE",subItems.toString());
+        //Log.i("APP USAGE",subItems.toString());
         DatabaseInitializer.addData(AppDatabase.getAppDatabase(ctx),"AppUsage",subItems.toString(), CommonFunctions.fetchDateInUTC());
     }
 
@@ -472,8 +354,6 @@ public class ForegroundService extends Service implements SensorEventListener {
     public void onDestroy() {
         super.onDestroy();
 
-        //Toast.makeText(getApplicationContext(),"App Destroyed",Toast.LENGTH_SHORT).show();
-        Log.i(LOG_TAG, "In onDestroy");
         unregisterReceiver(bluetoothReceiver);
         unregisterReceiver(wifiReceiver);
         unregisterReceiver(wifiScanReceiver);
@@ -483,7 +363,7 @@ public class ForegroundService extends Service implements SensorEventListener {
         unregisterReceiver(uninstallAppReceiver);
         unregisterReceiver(screenReceiver);
         unregisterReceiver(airplaneModeReceiver);
-        mSensorController.unregisterListener(this);
+        sensorManager.unregisterListener(this);
         stopChecker();
     }
 
@@ -509,17 +389,6 @@ public class ForegroundService extends Service implements SensorEventListener {
             Integer accAccuracy = sensorEvent.accuracy;
             Long accTimestamp = sensorEvent.timestamp;
 
-            /*final Handler ha=new Handler();
-            ha.postDelayed(new Runnable() {
-                @Override
-                public void run()
-                {
-                    if(!checkSensorVal)
-                        printValue();
-                    ha.postDelayed(this,60000);
-                }
-            }, 60000);*/
-
             if(isIntervalDone){
                 if(Preference.getInstance(this) != null)
                 {
@@ -528,7 +397,6 @@ public class ForegroundService extends Service implements SensorEventListener {
                     Preference.getInstance(this).put(Preference.Key.ACC_Y,String.valueOf(y));
                     Preference.getInstance(this).put(Preference.Key.ACC_Z,String.valueOf(z));
                     Preference.getInstance(this).put(Preference.Key.ACCURACY,String.valueOf(accAccuracy));
-                    //Preference.getInstance(this).put(String.valueOf(accTimestamp),Preference.Key.ACC_TIMESTAMP);
                     Log.i("TAG","SENSOR VAL: "+ x +"--"+ y +"--"+ z +"--"+ accAccuracy);
                 }
             }

@@ -2,14 +2,10 @@ package com.ezeia.devicesensing;
 
 import android.annotation.TargetApi;
 import android.app.AppOpsManager;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.provider.Settings;
 import android.support.annotation.RequiresApi;
@@ -18,33 +14,21 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.widget.TextView;
-
 import com.crashlytics.android.Crashlytics;
 import com.ezeia.devicesensing.service.ForegroundService;
 import com.ezeia.devicesensing.utils.Constants;
-
-import java.io.IOException;
-import java.lang.ref.WeakReference;
-import java.net.HttpURLConnection;
-import java.net.URL;
-
 import io.fabric.sdk.android.Fabric;
-
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 import static android.Manifest.permission.READ_CALL_LOG;
 import static android.Manifest.permission.READ_CONTACTS;
 import static android.Manifest.permission.READ_PHONE_STATE;
 import static android.Manifest.permission.READ_SMS;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
-import static com.crashlytics.android.Crashlytics.log;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final int MY_PERMISSIONS_REQUEST_PACKAGE_USAGE_STATS = 100;
-    private static final int MY_PERMISSIONS_REQUEST_NOTIFICATION = 300;
     private final int PERMISSION_REQUEST_CODE = 200;
-    private TextView txt_message;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,79 +37,6 @@ public class MainActivity extends AppCompatActivity {
         Fabric.with(this, new Crashlytics());
 
         fillStats();
-        //btnClick();
-        //LogsUtil.readLogs();
-    }
-
-    /*private void btnClick(){
-
-        txt_message = findViewById(R.id.txt_message);
-
-        Button btn_pushData = findViewById(R.id.btn_pushData);
-        btn_pushData.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(checkInternetConnection(MainActivity.this)){
-                    txt_message.setText("");
-                    MyTask task = new MyTask(MainActivity.this);
-                    task.execute();
-                }else{
-                    txt_message.setText(R.string.internet_connection);
-                }
-            }
-        });
-    }*/
-
-    static class MyTask extends AsyncTask<Void, Void, Boolean> {
-
-        private final WeakReference<MainActivity> activityReference;
-
-        // only retain a weak reference to the activity
-        MyTask(MainActivity context) {
-            activityReference = new WeakReference<>(context);
-        }
-
-        @Override
-        protected Boolean doInBackground(Void... v) {
-            try {
-                HttpURLConnection urlc = (HttpURLConnection)(new URL("http://www.google.com").openConnection());
-                urlc.setRequestProperty("User-Agent", "Test");
-                urlc.setRequestProperty("Connection", "close");
-                urlc.setConnectTimeout(10000);
-                urlc.connect();
-                return (urlc.getResponseCode() == 200);
-            } catch (IOException e) {
-                log("IOException in connectGoogle())");
-                return false;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(Boolean aVoid) {
-            super.onPostExecute(aVoid);
-
-            // get a reference to the activity if it is still there
-            MainActivity activity = activityReference.get();
-            if (activity == null || activity.isFinishing()) return;
-
-            // modify the activity's UI
-            TextView textView = activity.findViewById(R.id.txt_message);
-            if(aVoid){
-                textView.setText("");
-                //ScreenReceiver.startCreatingJSON(activity,textView);
-            }else{
-                textView.setText(R.string.internet_connection);
-            }
-        }
-    }
-
-    public static boolean checkInternetConnection(Context context) {
-        ConnectivityManager manager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo ni = null;
-        if(manager != null)
-            ni = manager.getActiveNetworkInfo();
-
-        return ni != null && ni.getState() == NetworkInfo.State.CONNECTED;
     }
 
     @Override
@@ -137,7 +48,6 @@ public class MainActivity extends AppCompatActivity {
     private void fillStats()
     {
         if (hasPermission()){
-
                 if (!checkPermissionExtra()) {
                     requestPermissionExtra();
                 } else {
@@ -242,9 +152,6 @@ public class MainActivity extends AppCompatActivity {
             case MY_PERMISSIONS_REQUEST_PACKAGE_USAGE_STATS:
                 fillStats();
                 break;
-            case MY_PERMISSIONS_REQUEST_NOTIFICATION:
-                fillStats();
-                break;
         }
     }
 
@@ -266,19 +173,5 @@ public class MainActivity extends AppCompatActivity {
         return mode == AppOpsManager.MODE_ALLOWED;
 //        return ContextCompat.checkSelfPermission(this,
 //                Manifest.permission.PACKAGE_USAGE_STATS) == PackageManager.PERMISSION_GRANTED;
-    }
-
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP_MR1)
-    private void requestNotificationPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            startActivityForResult(new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS), MY_PERMISSIONS_REQUEST_NOTIFICATION);
-        }
-    }
-
-    private boolean isNotificationServiceRunning() {
-        ContentResolver contentResolver = getContentResolver();
-        String enabledNotificationListeners = Settings.Secure.getString(contentResolver, "enabled_notification_listeners");
-        String packageName = getPackageName();
-        return enabledNotificationListeners != null && enabledNotificationListeners.contains(packageName);
     }
 }

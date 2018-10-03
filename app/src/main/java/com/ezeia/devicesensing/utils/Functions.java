@@ -11,6 +11,7 @@ import com.ezeia.devicesensing.SqliteRoom.Database.AppDatabase;
 import com.ezeia.devicesensing.SqliteRoom.utils.DatabaseInitializer;
 import com.ezeia.devicesensing.pref.Preference;
 import com.ezeia.devicesensing.receivers.LocationReceiver;
+import com.ezeia.devicesensing.service.ForegroundService;
 import com.ezeia.devicesensing.utils.CellTower.CellTowerStateListener;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -18,6 +19,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import static android.content.Context.TELEPHONY_SERVICE;
@@ -172,39 +176,40 @@ public class Functions
         object.addProperty("signal_strength",signalStrength);
         object.addProperty("timestamp", CommonFunctions.fetchDateInUTC());
 
+        Log.i(ForegroundService.LOG_TAG, "SIM STRENGTH...."+object.toString());
+
         Functions functions = new Functions(ctx);
         JsonObject objectLoc = functions.fetchLocation();
         object.add("location",objectLoc);
-        Log.i("LOCATION", "Location is..."+objectLoc.toString());
 
         DatabaseInitializer.addData(AppDatabase.getAppDatabase(ctx),"CellTower",object.toString(),CommonFunctions.fetchDateInUTC());
     }
 
     public void collectCellTowerData(){
-        TelephonyManager mTelephonyManager = (TelephonyManager) ctx.getSystemService(TELEPHONY_SERVICE);
-        if(mTelephonyManager != null)
-            mTelephonyManager.listen(new CellTowerStateListener(ctx), PhoneStateListener.LISTEN_SIGNAL_STRENGTHS);
 
-        final Handler handler = new Handler();
-        Timer t = new Timer();
-        t.scheduleAtFixedRate(new TimerTask() {
-            @Override
+        createExactTimer();
+    }
+
+
+    private void createExactTimer(){
+        ScheduledExecutorService scheduleTaskExecutor= Executors.newScheduledThreadPool(5);
+
+        // This schedule a task to run every 1 minutes:
+        scheduleTaskExecutor.scheduleAtFixedRate(new Runnable() {
             public void run() {
-                handler.post(new Runnable() {
-                    public void run() {
-                        if(Preference.getInstance(ctx) != null){
-                            String strength = "";
-                            String simType = Preference.getInstance(ctx).getCellTower();
-                            if(Preference.getInstance(ctx).getCellTowerStrength() != null){
-                                strength = Preference.getInstance(ctx).getCellTowerStrength();
-                            }
-                            Log.i(Constants.TAG,"Tower Strength..."+CommonFunctions.fetchDateInUTC());
-                            createJsonTower(simType,strength);
-                        }
+                if(Preference.getInstance(ctx) != null){
+                    String strength = "";
+                    String simType = Preference.getInstance(ctx).getCellTower();
+                    if(Preference.getInstance(ctx).getCellTowerStrength() != null){
+                        strength = Preference.getInstance(ctx).getCellTowerStrength();
                     }
-                });
+                    Log.i(ForegroundService.LOG_TAG,"Tower Strength..."+strength);
+                    if(!ForegroundService.isAlarmReportSent){
+                        createJsonTower(simType,strength);
+                    }
+                }
             }
-        }, 0, 60000);
+        }, 1, 1, TimeUnit.MINUTES);
     }
 
     public void collectedWithReport()

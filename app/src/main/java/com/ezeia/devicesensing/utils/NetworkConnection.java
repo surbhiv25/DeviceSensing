@@ -1,6 +1,8 @@
-package com.ezeia.devicesensing.service;
+package com.ezeia.devicesensing.utils;
 
 import android.os.AsyncTask;
+
+import com.ezeia.devicesensing.service.awstask.AwsUploader;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -8,7 +10,7 @@ import java.net.URL;
 
 import static com.crashlytics.android.Crashlytics.log;
 
-class NetworkConnection extends AsyncTask<Void,Void,Boolean>{
+public class NetworkConnection extends AsyncTask<Void,Void,Boolean>{
 
     private final AwsUploader uploader;
 

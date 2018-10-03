@@ -1,7 +1,10 @@
-package com.ezeia.devicesensing.service;
+package com.ezeia.devicesensing.service.awstask;
 
 import android.content.Context;
+import android.telephony.PhoneStateListener;
+import android.telephony.TelephonyManager;
 import android.util.Log;
+
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.CognitoCachingCredentialsProvider;
@@ -14,13 +17,21 @@ import com.ezeia.devicesensing.R;
 import com.ezeia.devicesensing.SqliteRoom.Database.AppDatabase;
 import com.ezeia.devicesensing.SqliteRoom.utils.DatabaseInitializer;
 import com.ezeia.devicesensing.pref.Preference;
+import com.ezeia.devicesensing.service.ForegroundService;
+import com.ezeia.devicesensing.utils.CellTower.CellTowerStateListener;
+import com.ezeia.devicesensing.utils.NetworkConnection;
+
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import java.io.File;
 import java.util.List;
+
 import io.fabric.sdk.android.Fabric;
 
-public class AwsUploader implements NetworkConnection.ResultListener {
+import static android.content.Context.TELEPHONY_SERVICE;
+
+public class AwsUploader implements NetworkConnection.ResultListener,KinesisUploadTest.SubmmittedListener {
 
     private final Context ctx;
     private KinesisFirehoseRecorder firehoseRecorder;
@@ -95,7 +106,7 @@ public class AwsUploader implements NetworkConnection.ResultListener {
             if(Preference.getInstance(ctx) != null){
                 uniqueID = Preference.getInstance(ctx).getUniqueID();
             }
-            KinesisUploadTest task = new KinesisUploadTest(firehoseRecorder);
+            KinesisUploadTest task = new KinesisUploadTest(firehoseRecorder,this);
             task.execute();
         }else{
             //String[] probeList = Constants.probeList;
@@ -126,26 +137,28 @@ public class AwsUploader implements NetworkConnection.ResultListener {
             if(jsonList != null) {
                 finalObject = new JSONObject(jsonList);
                 newLineAdd = finalObject.toString() + "\n";
+
                 try {
                     firehoseRecorder.saveRecord(newLineAdd, kinesisStreamName);
                     isSaved = true;
-                    Log.i("TAG","SUCCESSFULLY SAVING....");
+                    ForegroundService.isAlarmReportSent = false;
+                    Log.i(ForegroundService.LOG_TAG,"SUCCESSFULLY SAVING....");
                     Answers.getInstance().logCustom(new CustomEvent("Data Saving")
                             .putCustomAttribute("Exception","Saved"));
 
                 } catch (AmazonClientException e) {
                     isSaved = false;
-                    Log.i("TAG","ERROR IN SAVING...."+e);
+                    Log.i(ForegroundService.LOG_TAG,"ERROR IN SAVING...."+e);
                     Answers.getInstance().logCustom(new CustomEvent("Data Saving")
                             .putCustomAttribute("Exception",e.getMessage()));
                 } catch (IllegalArgumentException e) {
                     isSaved = false;
-                    Log.i("TAG","ERROR IN SAVING...."+e);
+                    Log.i(ForegroundService.LOG_TAG,"ERROR IN SAVING...."+e);
                     Answers.getInstance().logCustom(new CustomEvent("Data Saving")
                             .putCustomAttribute("Exception",e.getMessage()));
                 } catch (Exception e) {
                     isSaved = false;
-                    Log.i("TAG","ERROR IN SAVING...."+e);
+                    Log.i(ForegroundService.LOG_TAG,"ERROR IN SAVING...."+e);
                     Answers.getInstance().logCustom(new CustomEvent("Data Saving")
                             .putCustomAttribute("Exception",e.getMessage()));
                 }
@@ -162,7 +175,7 @@ public class AwsUploader implements NetworkConnection.ResultListener {
                             Preference.Key.LOC_HAS_BEARING, Preference.Key.LOC_HAS_SPEED, Preference.Key.LOC_MOCK_PROVIDER,
                             Preference.Key.LOC_PROVIDER, Preference.Key.LOC_ELAPSED_TIME);
 
-                    KinesisUploadTest task = new KinesisUploadTest(firehoseRecorder);
+                    KinesisUploadTest task = new KinesisUploadTest(firehoseRecorder,this);
                     task.execute();
                 }
 
@@ -179,4 +192,10 @@ public class AwsUploader implements NetworkConnection.ResultListener {
         }
     }
 
+    @Override
+    public void isSuccessfullySubmitted(Boolean aVoid) {
+        TelephonyManager mTelephonyManager = (TelephonyManager) ctx.getSystemService(TELEPHONY_SERVICE);
+        if(mTelephonyManager != null)
+            mTelephonyManager.listen(new CellTowerStateListener(ctx), PhoneStateListener.LISTEN_SIGNAL_STRENGTHS);
+    }
 }

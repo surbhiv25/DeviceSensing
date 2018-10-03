@@ -32,7 +32,7 @@ public class AirplaneModeReceiver extends BroadcastReceiver {
             Functions functions = new Functions(context);
             JsonObject objectLoc = functions.fetchLocation();
             object.add("location",objectLoc);
-            Log.i("LOCATION", "Location is..."+objectLoc.toString());
+            Log.i(ForegroundService.LOG_TAG, "Location is..."+objectLoc.toString());
             DatabaseInitializer.addData(AppDatabase.getAppDatabase(context),"Airplane",object.toString(),CommonFunctions.fetchDateInUTC());
 
         } else {
@@ -46,7 +46,7 @@ public class AirplaneModeReceiver extends BroadcastReceiver {
             Functions functions = new Functions(context);
             JsonObject objectLoc = functions.fetchLocation();
             object.add("location",objectLoc);
-            Log.i("LOCATION", "Location is..."+objectLoc.toString());
+            Log.i(ForegroundService.LOG_TAG, "Location is..."+objectLoc.toString());
             DatabaseInitializer.addData(AppDatabase.getAppDatabase(context),"Airplane",object.toString(),CommonFunctions.fetchDateInUTC());
         }
     }

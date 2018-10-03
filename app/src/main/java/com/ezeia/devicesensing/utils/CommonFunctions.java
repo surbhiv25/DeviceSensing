@@ -112,7 +112,7 @@ public class CommonFunctions {
                 hmap.put("Sim Country",simCountryISo);
                 hmap.put("Sim Operator",simOperator);
                 hmap.put("Sim Operator Name",simOperatorName);
-                hmap.put("Sim Serial No.",simSerialNo);
+                hmap.put("Sim Serial Num",simSerialNo);
                 hmap.put("Sim State",String.valueOf(simState));
                 hmap.put("Subscriber ID",subscriberId);
                 hmap.put("Voicemail Alpha Tag",voicemailTag);
@@ -234,7 +234,7 @@ public class CommonFunctions {
         if(activityManager != null)
             activityManager.getMemoryInfo(mi);
 
-        return mi.availMem / 1048576L;
+        return mi.availMem;
     }
 
     public static long totalRamMemorySize(Context ctx) {
@@ -243,7 +243,7 @@ public class CommonFunctions {
         if(activityManager != null)
             activityManager.getMemoryInfo(mi);
 
-        return mi.totalMem / 1048576L;
+        return mi.totalMem;
     }
 
     private static boolean externalMemoryAvailable() {
@@ -299,6 +299,10 @@ public class CommonFunctions {
             if (size >= 1024) {
                 suffix = " MB";
                 size /= 1024;
+                if (size >= 1024) {
+                    suffix = " GB";
+                    size /= 1024;
+                }
             }
         }
         StringBuilder resultBuffer = new StringBuilder(Long.toString(size));

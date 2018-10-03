@@ -11,6 +11,7 @@ import com.crashlytics.android.Crashlytics;
 import com.ezeia.devicesensing.SqliteRoom.Database.AppDatabase;
 import com.ezeia.devicesensing.SqliteRoom.utils.DatabaseInitializer;
 import com.ezeia.devicesensing.pref.Preference;
+import com.ezeia.devicesensing.service.ForegroundService;
 import com.ezeia.devicesensing.utils.CommonFunctions;
 import com.google.gson.JsonObject;
 
@@ -25,7 +26,7 @@ public class LocationReceiver extends BroadcastReceiver {
         Fabric.with(context, new Crashlytics());
         if(intent.getAction() != null)
             if (intent.getAction().matches(LocationManager.PROVIDERS_CHANGED_ACTION)) {
-                Log.i("TAG","Location is..."+checkIfLocEnabled(context));
+                Log.i(ForegroundService.LOG_TAG,"Location is..."+checkIfLocEnabled(context));
 
                 if(!checkIfLocEnabled(context)){
                     Preference.getInstance(context).put(Preference.Key.LOC_LATITUDE,"0.0");

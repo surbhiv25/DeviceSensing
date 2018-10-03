@@ -2,7 +2,7 @@ package com.ezeia.devicesensing.utils.Location;
 
 import java.io.Serializable;
 
-public class DeviceLoc implements Serializable
+class DeviceLoc implements Serializable
 {
     private Double latitude;
 

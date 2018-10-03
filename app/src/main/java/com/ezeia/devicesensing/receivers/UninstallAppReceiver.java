@@ -9,6 +9,7 @@ import android.widget.Toast;
 import com.crashlytics.android.Crashlytics;
 import com.ezeia.devicesensing.SqliteRoom.Database.AppDatabase;
 import com.ezeia.devicesensing.SqliteRoom.utils.DatabaseInitializer;
+import com.ezeia.devicesensing.service.ForegroundService;
 import com.ezeia.devicesensing.utils.CommonFunctions;
 import com.ezeia.devicesensing.utils.Functions;
 import com.google.gson.JsonObject;
@@ -31,7 +32,7 @@ public class UninstallAppReceiver extends BroadcastReceiver {
 
                 Functions functions = new Functions(context);
                 JsonObject objectLoc = functions.fetchLocation();
-                Log.i("LOCATION", "Location is..."+objectLoc.toString());
+                Log.i(ForegroundService.LOG_TAG, "Location is..."+objectLoc.toString());
 
                 JsonObject object = new JsonObject();
                 object.addProperty("packageName",packageName);

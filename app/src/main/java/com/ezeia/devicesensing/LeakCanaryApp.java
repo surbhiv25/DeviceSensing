@@ -1,6 +1,7 @@
 package com.ezeia.devicesensing;
 
 import android.app.Application;
+import android.os.Build;
 import android.os.StrictMode;
 
 import com.squareup.leakcanary.LeakCanary;
@@ -23,10 +24,12 @@ public class LeakCanaryApp extends Application {
     }
 
     private static void enabledStrictMode() {
-        StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder() //
-                .detectAll() //
-                .penaltyLog() //
-                .penaltyDeath() //
-                .build());
+        if(BuildConfig.DEBUG){
+            StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder() //
+                    .detectAll() //
+                    .penaltyLog() //
+                    .penaltyDeath() //
+                    .build());
+        }
     }
 }

@@ -9,6 +9,7 @@ import android.widget.Toast;
 import com.crashlytics.android.Crashlytics;
 import com.ezeia.devicesensing.SqliteRoom.Database.AppDatabase;
 import com.ezeia.devicesensing.SqliteRoom.utils.DatabaseInitializer;
+import com.ezeia.devicesensing.service.ForegroundService;
 import com.ezeia.devicesensing.utils.CommonFunctions;
 import com.ezeia.devicesensing.utils.Functions;
 import com.google.gson.JsonObject;
@@ -36,7 +37,7 @@ public class InstallAppReceiver extends BroadcastReceiver {
             object.addProperty("packageName",packageName);
             object.addProperty("timestamp",CommonFunctions.fetchDateInUTC());
             object.add("location",objectLoc);
-            Log.i("LOCATION", "Location is..."+objectLoc.toString());
+            Log.i(ForegroundService.LOG_TAG, "Location is..."+objectLoc.toString());
             DatabaseInitializer.addData(AppDatabase.getAppDatabase(context),"Install",object.toString(),CommonFunctions.fetchDateInUTC());
         }
     }

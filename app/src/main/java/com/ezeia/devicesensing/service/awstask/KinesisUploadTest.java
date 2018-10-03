@@ -1,18 +1,27 @@
-package com.ezeia.devicesensing.service;
+package com.ezeia.devicesensing.service.awstask;
 
 import android.os.AsyncTask;
+import android.telephony.PhoneStateListener;
+import android.telephony.TelephonyManager;
 import android.util.Log;
+
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.mobileconnectors.kinesis.kinesisrecorder.KinesisFirehoseRecorder;
 import com.crashlytics.android.answers.Answers;
 import com.crashlytics.android.answers.CustomEvent;
+import com.ezeia.devicesensing.service.ForegroundService;
+import com.ezeia.devicesensing.utils.CellTower.CellTowerStateListener;
+
+import static android.content.Context.TELEPHONY_SERVICE;
 
 class KinesisUploadTest extends AsyncTask<Void,Void,Boolean>{
 
     private final KinesisFirehoseRecorder recorder;
+    private final AwsUploader uploader;
 
-    public KinesisUploadTest(KinesisFirehoseRecorder firehoseRecorder) {
+    public KinesisUploadTest(KinesisFirehoseRecorder firehoseRecorder,AwsUploader uploader) {
         this.recorder = firehoseRecorder;
+        this.uploader = uploader;
     }
 
     @Override
@@ -30,12 +39,12 @@ class KinesisUploadTest extends AsyncTask<Void,Void,Boolean>{
             Answers.getInstance().logCustom(new CustomEvent("AWS Called...DoInBackground")
                     .putCustomAttribute("Exception",ace.getCause().toString()));
 
-            Log.i("TAG",ace.getMessage()+"---"+ace.getCause());
+            Log.i(ForegroundService.LOG_TAG,ace.getMessage()+"---"+ace.getCause());
             return true;
         } catch (Exception ace) {
             Answers.getInstance().logCustom(new CustomEvent("AWS Called...DoInBackground")
                     .putCustomAttribute("Exception",ace.getCause().toString()));
-            Log.i("TAG",ace.getMessage()+"---"+ace.getCause());
+            Log.i(ForegroundService.LOG_TAG,ace.getMessage()+"---"+ace.getCause());
             return true;
         }
         return false;
@@ -51,6 +60,13 @@ class KinesisUploadTest extends AsyncTask<Void,Void,Boolean>{
         }else{
             Answers.getInstance().logCustom(new CustomEvent("AWS Called...PostExecute")
                     .putCustomAttribute("FlagValue","Successful"));
+
+            KinesisUploadTest.SubmmittedListener listener = uploader;
+            listener.isSuccessfullySubmitted(true);
         }
+    }
+
+    public interface SubmmittedListener{
+        void isSuccessfullySubmitted(Boolean aVoid);
     }
 }

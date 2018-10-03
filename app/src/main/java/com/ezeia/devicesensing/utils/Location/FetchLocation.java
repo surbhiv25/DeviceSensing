@@ -13,6 +13,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.ezeia.devicesensing.pref.Preference;
+import com.ezeia.devicesensing.service.ForegroundService;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -90,7 +91,7 @@ public class FetchLocation implements GoogleApiClient.ConnectionCallbacks,
             String provider = location.getProvider();
             double elapsedTime = location.getElapsedRealtimeNanos();
 
-            Log.i("TAG","LOCATION IS..."+latitude+"---"+longitude);
+            //Log.i(ForegroundService.LOG_TAG,"LOCATION IS..."+latitude+"---"+longitude);
             if(Preference.getInstance(ctx) != null){
                 Preference.getInstance(ctx).put(Preference.Key.LOC_LATITUDE,latitude);
                 Preference.getInstance(ctx).put(Preference.Key.LOC_LONGITUDE,longitude);

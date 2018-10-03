@@ -155,7 +155,7 @@ public class Preference {
         return mPref.getBoolean(key, defaultValue);
     }
 
-    public boolean getBoolean(String key) {
+    private boolean getBoolean(String key) {
         return mPref.getBoolean(key, false);
     }
 
@@ -273,7 +273,7 @@ public class Preference {
         return !isAccuracyEmpty() ? "" : getString(Key.ACCURACY);
     }
 
-    public boolean isCellTowerEmpty() {
+    private boolean isCellTowerEmpty() {
         return TextUtils.isEmpty(getString(Key.CELL_TOWER_SIM));
     }
     public String getCellTower() {

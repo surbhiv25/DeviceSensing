@@ -13,6 +13,7 @@ import android.widget.Toast;
 import com.crashlytics.android.Crashlytics;
 import com.ezeia.devicesensing.SqliteRoom.Database.AppDatabase;
 import com.ezeia.devicesensing.SqliteRoom.utils.DatabaseInitializer;
+import com.ezeia.devicesensing.service.ForegroundService;
 import com.ezeia.devicesensing.utils.CommonFunctions;
 import com.ezeia.devicesensing.utils.Functions;
 import com.google.gson.JsonArray;
@@ -96,7 +97,7 @@ public class WifiReceiver extends BroadcastReceiver {
         Functions functions = new Functions(context);
         JsonObject objectLoc = functions.fetchLocation();
         jsonObject.add("location",objectLoc);
-        Log.i("LOCATION", "Location is..."+objectLoc.toString());
+        Log.i(ForegroundService.LOG_TAG, "Location is..."+objectLoc.toString());
 
         if(object != null)
             DatabaseInitializer.addData(AppDatabase.getAppDatabase(context),"WifiConnection",object.toString(),CommonFunctions.fetchDateInUTC());
@@ -108,7 +109,7 @@ public class WifiReceiver extends BroadcastReceiver {
 
         Functions functions = new Functions(context);
         JsonObject objectLoc = functions.fetchLocation();
-        Log.i("LOCATION", "Location is..."+objectLoc.toString());
+        Log.i(ForegroundService.LOG_TAG, "Location is..."+objectLoc.toString());
 
         JsonObject object = new JsonObject();
         object.addProperty("state","OFF");

@@ -3,8 +3,10 @@ package com.ezeia.devicesensing.utils.CellTower;
 import android.content.Context;
 import android.telephony.PhoneStateListener;
 import android.telephony.SignalStrength;
+import android.util.Log;
 
 import com.ezeia.devicesensing.pref.Preference;
+import com.ezeia.devicesensing.service.ForegroundService;
 
 public class CellTowerStateListener extends PhoneStateListener
 {
@@ -43,13 +45,13 @@ public class CellTowerStateListener extends PhoneStateListener
             simType = "GSM";
             //createJson("CDMA",signalStrengthValue);
         }
-        //Log.i("TAG","Signal Strength : " + signalStrengthValue);
+        Log.i(ForegroundService.LOG_TAG,"Signal LISTENER : " + signalStrengthValue);
 
-        Boolean checkIfPluggedIn = Preference.getInstance(ctx).isCellTowerEmpty();
-        if(checkIfPluggedIn) {
+        //Boolean checkIfPluggedIn = Preference.getInstance(ctx).isCellTowerEmpty();
+        //if(checkIfPluggedIn) {
             Preference.getInstance(ctx).put(Preference.Key.CELL_TOWER_SIM, simType);
             Preference.getInstance(ctx).put(Preference.Key.CELL_TOWER_VAL, String.valueOf(signalStrengthValue));
-        }
+        //}
 
         /*
         TelephonyManager mTelephonyManager = (TelephonyManager) ctx.getSystemService(TELEPHONY_SERVICE);

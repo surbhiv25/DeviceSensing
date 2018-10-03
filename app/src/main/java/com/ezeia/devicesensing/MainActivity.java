@@ -39,12 +39,6 @@ public class MainActivity extends AppCompatActivity {
         fillStats();
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        fillStats();
-    }
-
     private void fillStats()
     {
         if (hasPermission()){
@@ -104,6 +98,9 @@ public class MainActivity extends AppCompatActivity {
 
                     if (smsAccepted && callLogAccepted && contactsAccepted && phoneAccepted
                             && locationAccepted && storageAccepted ) {
+                        //if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+
+                        //}
                         Intent startIntent = new Intent(MainActivity.this, ForegroundService.class);
                         startIntent.setAction(Constants.ACTION.STARTFOREGROUND_ACTION);
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)

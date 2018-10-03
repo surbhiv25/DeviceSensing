@@ -67,6 +67,14 @@
             android:value="eae077e99fb518626253b3e8fa5e65de8df67b12"
             />
 
+        <receiver
+            android:name=".receivers.MyAlarm"
+            android:exported="true" >
+            <intent-filter>
+                <action android:name="android.intent.action.NOTIFY" />
+            </intent-filter>
+        </receiver>
+
     </application>
 
 </manifest>

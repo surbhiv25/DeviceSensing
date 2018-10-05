@@ -135,7 +135,7 @@ public class BTStateChangedReceiver extends BroadcastReceiver {
 
             case BluetoothAdapter.STATE_ON:
                 Toast.makeText(context,"Bluetooth ON",Toast.LENGTH_SHORT).show();
-                //Log.i(ForegroundService.LOG_TAG,"BLUETOOTH ON: "+ CommonFunctions.fetchDateInUTC());
+                Log.i(ForegroundService.LOG_TAG,"BLUETOOTH ON: "+ CommonFunctions.fetchDateInUTC());
 
                 String nameState = checkBluetoothConn();
                 //Log.i(ForegroundService.LOG_TAG,"NAME STATE: "+nameState);
@@ -278,10 +278,10 @@ public class BTStateChangedReceiver extends BroadcastReceiver {
                     }
                 }
                 subItems.add("paired_Devices",jsonArray);
-                Functions functions = new Functions(context);
-                JsonObject objectLoc = functions.fetchLocation();
-                subItems.add("location",objectLoc);
-                Log.i(ForegroundService.LOG_TAG, "Location is..."+objectLoc.toString());
+//                Functions functions = new Functions(context);
+//                JsonObject objectLoc = functions.fetchLocation();
+//                subItems.add("location",objectLoc);
+//                Log.i(ForegroundService.LOG_TAG, "Location is..."+objectLoc.toString());
             }
         }
         //DatabaseInitializer.deleteProbe(AppDatabase.getAppDatabase(context),"Bluetooth_State");
@@ -319,13 +319,13 @@ public class BTStateChangedReceiver extends BroadcastReceiver {
                 subItems.addProperty("timestamp",timestamp);
             }
 
-            Functions functions = new Functions(context);
-            JsonObject objectLoc = functions.fetchLocation();
-            subItems.add("location",objectLoc);
+//            Functions functions = new Functions(context);
+//            JsonObject objectLoc = functions.fetchLocation();
+//            subItems.add("location",objectLoc);
 
             //DatabaseInitializer.deleteProbe(AppDatabase.getAppDatabase(context),"Bluetooth_Connection");
             //header.put("Bluetooth_Connection",subItems);
-            Log.i(ForegroundService.LOG_TAG, "Location is..."+objectLoc.toString());
+            //Log.i(ForegroundService.LOG_TAG, "Location is..."+objectLoc.toString());
             DatabaseInitializer.addData(AppDatabase.getAppDatabase(context),"Bluetooth_Connection",subItems.toString(),CommonFunctions.fetchDateInUTC());
         }
     }

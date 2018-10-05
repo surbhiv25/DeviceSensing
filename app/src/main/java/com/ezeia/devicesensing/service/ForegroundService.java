@@ -52,13 +52,22 @@ import com.ezeia.devicesensing.utils.Functions;
 import com.ezeia.devicesensing.utils.Location.FetchLocation;
 import com.google.gson.JsonObject;
 import com.rvalerio.fgchecker.AppChecker;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.RandomAccessFile;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import io.fabric.sdk.android.Fabric;
 
 public class ForegroundService extends Service implements SensorEventListener {
@@ -78,7 +87,8 @@ public class ForegroundService extends Service implements SensorEventListener {
     private SensorManager sensorManager = null;
     private Boolean isIntervalDone = false;
     private static final String PRIMARY_NOTIF_CHANNEL = "default";
-    public static Boolean isAlarmReportSent= false;
+    public static Boolean isReportSending= false;
+    public static Boolean screenOnOffStatus= true;
 
     @Override
     public void onCreate() {
@@ -91,24 +101,13 @@ public class ForegroundService extends Service implements SensorEventListener {
         callReceivers();
         startChecker();
 
-        long totalInternalValue = CommonFunctions.getTotalInternalMemorySize();
-        long freeInternalValue = CommonFunctions.getAvailableInternalMemorySize();
-        long usedInternalValue = totalInternalValue - freeInternalValue;
-        Log.i("TAGGG",CommonFunctions.formatSize(totalInternalValue));
-        Log.i("TAGGG",CommonFunctions.formatSize(freeInternalValue));
-        Log.i("TAGGG",CommonFunctions.formatSize(usedInternalValue));
-
-        long totalRamValue = CommonFunctions.totalRamMemorySize(ctx);
-        long freeRamValue = CommonFunctions.freeRamMemorySize(ctx);
-        long usedRamValue = totalRamValue - freeRamValue;
-        Log.i("TAGGG_RAM",CommonFunctions.formatSize(totalRamValue));
-        Log.i("TAGGG_RAM",CommonFunctions.formatSize(freeRamValue));
-        Log.i("TAGGG_RAM",CommonFunctions.formatSize(usedRamValue));
-
+        if(Preference.getInstance(ctx) != null){
+            Preference.getInstance(ctx).put(Preference.Key.IS_REPORT_SENT,false);
+            //Preference.getInstance(ctx).put(Preference.Key.IS_HANDLER_CALLED,false);
+        }
         Functions functions = new Functions(this);
         //functions.primaryKeyData();
-        functions.collectedUponUsage();
-        //functions.collectedWithActivity();
+        //functions.collectedUponUsage();
         functions.collectCellTowerData();
 
         new FetchLocation(this);
@@ -116,6 +115,55 @@ public class ForegroundService extends Service implements SensorEventListener {
 
         setAlarm();
 
+    }
+
+    public String getTotalRAM() {
+
+        RandomAccessFile reader = null;
+        String load = null;
+        DecimalFormat twoDecimalForm = new DecimalFormat("#.##");
+        double totRam = 0;
+        String lastValue = "";
+        try {
+            reader = new RandomAccessFile("/proc/meminfo", "r");
+            load = reader.readLine();
+
+            // Get the Number value from the string
+            Pattern p = Pattern.compile("(\\d+)");
+            Matcher m = p.matcher(load);
+            String value = "";
+            while (m.find()) {
+                value = m.group(1);
+                // System.out.println("Ram : " + value);
+            }
+            reader.close();
+
+            totRam = Double.parseDouble(value);
+            // totRam = totRam / 1024;
+
+            double mb = totRam / 1024.0;
+            double gb = totRam / 1048576.0;
+            double tb = totRam / 1073741824.0;
+
+            if (tb > 1) {
+                lastValue = twoDecimalForm.format(tb).concat(" TB");
+            } else if (gb > 1) {
+                lastValue = twoDecimalForm.format(gb).concat(" GB");
+            } else if (mb > 1) {
+                lastValue = twoDecimalForm.format(mb).concat(" MB");
+            } else {
+                lastValue = twoDecimalForm.format(totRam).concat(" KB");
+            }
+
+
+
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        } finally {
+            // Streams.close(reader);
+        }
+
+        return lastValue;
     }
 
     private void setAlarm() {
@@ -327,7 +375,7 @@ public class ForegroundService extends Service implements SensorEventListener {
                             String appName = Preference.getInstance(ctx).getPackageName();
                             String startTime = Preference.getInstance(ctx).getStartTime();
                             String closeTime = Preference.getInstance(ctx).getCloseTime();
-                            createAndSaveJson(appName,startTime,closeTime);
+                            createAndSaveJson(appName, startTime, closeTime);
 
                             Preference.getInstance(ctx).put(Preference.Key.PACKAGE_NAME, packageName);
                             Preference.getInstance(ctx).put(Preference.Key.START_TIME, CommonFunctions.fetchDateInUTC());
@@ -352,15 +400,15 @@ public class ForegroundService extends Service implements SensorEventListener {
 
     private void createAndSaveJson(String packgeName, String startTime, String closeTime)
     {
-        Functions functions = new Functions(ctx);
+       /* Functions functions = new Functions(ctx);
         JsonObject objectLoc = functions.fetchLocation();
         Log.i(ForegroundService.LOG_TAG, "Location is..."+objectLoc.toString());
-
+*/
         JsonObject subItems = new JsonObject();
         subItems.addProperty("package_Name",packgeName);
         subItems.addProperty("start_Time",startTime);
         subItems.addProperty("close_Time",closeTime);
-        subItems.add("location",objectLoc);
+        //subItems.add("location",objectLoc);
         //Log.i("APP USAGE",subItems.toString());
         DatabaseInitializer.addData(AppDatabase.getAppDatabase(ctx),"AppUsage",subItems.toString(), CommonFunctions.fetchDateInUTC());
     }
@@ -425,7 +473,8 @@ public class ForegroundService extends Service implements SensorEventListener {
                 isIntervalDone = true;
                 String xAcc = "",yAcc ="", zAcc = "", accuracy ="";
 
-                if(!isAlarmReportSent){
+                //means report is not sending currently and screen is ON
+                if(screenOnOffStatus && !isReportSending){
                     if(Preference.getInstance(ctx) != null){
                         if(Preference.getInstance(ctx).getAccX() != null){
                             xAcc = Preference.getInstance(ctx).getAccX();
@@ -439,7 +488,6 @@ public class ForegroundService extends Service implements SensorEventListener {
                         if(Preference.getInstance(ctx).getAccuracy() != null){
                             accuracy = Preference.getInstance(ctx).getAccuracy();
                         }
-                        Log.i(ForegroundService.LOG_TAG,"SENSOR GET..."+xAcc+"--"+yAcc+"--"+zAcc+"--"+accuracy);
                         Functions func = new Functions(ctx);
                         func.createJSon(xAcc,yAcc,zAcc,accuracy);
                     }

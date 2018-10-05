@@ -6,6 +6,8 @@ import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.net.wifi.WifiInfo;
@@ -22,13 +24,18 @@ import android.util.Log;
 import com.an.deviceinfo.device.model.Battery;
 import com.ezeia.devicesensing.SqliteRoom.Database.AppDatabase;
 import com.ezeia.devicesensing.SqliteRoom.utils.DatabaseInitializer;
+import com.ezeia.devicesensing.service.ForegroundService;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import java.io.File;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import static android.content.Context.ACTIVITY_SERVICE;
@@ -246,8 +253,16 @@ public class CommonFunctions {
         return mi.totalMem;
     }
 
-    private static boolean externalMemoryAvailable() {
-        return android.os.Environment.getExternalStorageState().equals(android.os.Environment.MEDIA_MOUNTED);
+    public static boolean externalMemoryAvailable() {
+        if (Environment.isExternalStorageRemovable()) {
+            //device support sd card. We need to check sd card availability.
+            String state = Environment.getExternalStorageState();
+            return state.equals(Environment.MEDIA_MOUNTED) || state.equals(
+                    Environment.MEDIA_MOUNTED_READ_ONLY);
+        } else {
+            //device not support sd card.
+            return false;
+        }
     }
 
     public static long getAvailableInternalMemorySize() {
@@ -267,53 +282,55 @@ public class CommonFunctions {
     }
 
     public static long getAvailableExternalMemorySize() {
-        if (externalMemoryAvailable()) {
+
             File path = Environment.getExternalStorageDirectory();
             StatFs stat = new StatFs(path.getPath());
             long blockSize = stat.getBlockSize();
             long availableBlocks = stat.getAvailableBlocks();
             return availableBlocks * blockSize;
-        } else {
-            return 0;
-        }
     }
 
     public static long getTotalExternalMemorySize() {
-        if (externalMemoryAvailable()) {
             File path = Environment.getExternalStorageDirectory();
             StatFs stat = new StatFs(path.getPath());
             long blockSize = stat.getBlockSize();
             long totalBlocks = stat.getBlockCount();
             return totalBlocks * blockSize;
-        } else {
-            return 0;
-        }
     }
 
     public static String formatSize(long size) {
         String suffix = null;
 
-        if (size >= 1024) {
+        DecimalFormat twoDecimalForm = new DecimalFormat("#.##");
+        Double sizeVal = (double) size;
+        if (sizeVal >= 1024) {
             suffix = " KB";
-            size /= 1024;
-            if (size >= 1024) {
+            sizeVal /= 1024;
+            if (sizeVal >= 1024) {
                 suffix = " MB";
-                size /= 1024;
-                if (size >= 1024) {
+                sizeVal /= 1024;
+                if (sizeVal >= 1024) {
                     suffix = " GB";
-                    size /= 1024;
+                    sizeVal /= 1024;
                 }
             }
         }
-        StringBuilder resultBuffer = new StringBuilder(Long.toString(size));
 
-        int commaOffset = resultBuffer.length() - 3;
+        StringBuilder resultBuffer = new StringBuilder(twoDecimalForm.format(sizeVal));
+
+       /* int commaOffset = resultBuffer.length() - 3;
         while (commaOffset > 0) {
             resultBuffer.insert(commaOffset, ',');
             commaOffset -= 3;
-        }
+        }*/
         if (suffix != null) resultBuffer.append(suffix);
         return resultBuffer.toString();
+    }
+
+    private static String returnToDecimal(long values){
+        DecimalFormat df = new DecimalFormat("#.##");
+        String angle = df.format(values);
+        return angle;
     }
 
     public static void getCallDetails(Context ctx) {
@@ -508,8 +525,52 @@ public class CommonFunctions {
                 String activeService=service.service.getClassName();
                 array.add(new JsonPrimitive(activeService));
             }
-            object.add("Services_running", array);
-            DatabaseInitializer.addData(AppDatabase.getAppDatabase(ctx),"ActiveServices",object.toString(), CommonFunctions.fetchDateInUTC());
+            //object.add("Services_running", array);
+            Log.i(ForegroundService.LOG_TAG,"SERVICES...."+array.toString());
+            DatabaseInitializer.addData(AppDatabase.getAppDatabase(ctx),"ActiveServices",array.toString(), CommonFunctions.fetchDateInUTC());
         }
+    }
+
+    //get system and user installed apps
+    public static void getUserInstalledApps(Context ctx) {
+        ArrayList<String> list = new ArrayList<>();
+        final PackageManager packageManager = ctx.getPackageManager();
+
+        List<ApplicationInfo> installedApplications = packageManager.getInstalledApplications(PackageManager.GET_META_DATA);
+        JsonArray jsonArray = new JsonArray();
+        for (ApplicationInfo appInfo : installedApplications)
+        {
+            if ((appInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0)
+            {
+                JsonObject person = new JsonObject();
+
+                String appName = appInfo.loadLabel(ctx.getPackageManager()).toString();
+                person.addProperty("AppName", appName);
+                person.addProperty("PackageName", appInfo.packageName);
+                jsonArray.add(person);
+            }
+        }
+        DatabaseInitializer.addData(AppDatabase.getAppDatabase(ctx),"UserInstalledApps",jsonArray.toString(), CommonFunctions.fetchDateInUTC());
+    }
+
+    public static void getSystemInstalledApps(Context ctx) {
+        ArrayList<String> list = new ArrayList<>();
+        final PackageManager packageManager = ctx.getPackageManager();
+
+        List<ApplicationInfo> installedApplications = packageManager.getInstalledApplications(PackageManager.GET_META_DATA);
+        JsonArray jsonArray = new JsonArray();
+        for (ApplicationInfo appInfo : installedApplications)
+        {
+            if ((appInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0)
+            {
+                JsonObject person = new JsonObject();
+
+                String appName = appInfo.loadLabel(ctx.getPackageManager()).toString();
+                person.addProperty("AppName", appName);
+                person.addProperty("PackageName", appInfo.packageName);
+                jsonArray.add(person);
+            }
+        }
+        DatabaseInitializer.addData(AppDatabase.getAppDatabase(ctx),"SystemApps",jsonArray.toString(), CommonFunctions.fetchDateInUTC());
     }
 }

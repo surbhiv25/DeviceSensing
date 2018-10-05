@@ -25,6 +25,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import static android.content.Context.TELEPHONY_SERVICE;
+import static com.ezeia.devicesensing.service.ForegroundService.isReportSending;
 
 public class Functions
 {
@@ -91,6 +92,8 @@ public class Functions
         // 1. Time
         // 2. Location (Lat/Long)
         CommonFunctions.isServiceRunning(ctx);
+        CommonFunctions.getUserInstalledApps(ctx);
+        CommonFunctions.getSystemInstalledApps(ctx);
     }
 
     public JsonObject fetchLocation(){
@@ -155,16 +158,16 @@ public class Functions
 
     public void createJSon(String x, String y, String z, String acc){
 
-        Functions functions = new Functions(ctx);
+        /*Functions functions = new Functions(ctx);
         JsonObject objectLoc = functions.fetchLocation();
-
+*/
         JsonObject object = new JsonObject();
         object.addProperty("X",x);
         object.addProperty("Y",y);
         object.addProperty("Z",z);
         object.addProperty("Accuracy",acc);
         object.addProperty("timestamp",CommonFunctions.fetchDateInUTC());
-        object.add("location",objectLoc);
+        //object.add("location",objectLoc);
         Log.i("SENSOR SAVE INFO", x+"--"+y+"--"+z);
         DatabaseInitializer.addData(AppDatabase.getAppDatabase(ctx),"Sensor",object.toString(),CommonFunctions.fetchDateInUTC());
     }
@@ -178,10 +181,10 @@ public class Functions
 
         Log.i(ForegroundService.LOG_TAG, "SIM STRENGTH...."+object.toString());
 
-        Functions functions = new Functions(ctx);
+        /*Functions functions = new Functions(ctx);
         JsonObject objectLoc = functions.fetchLocation();
         object.add("location",objectLoc);
-
+*/
         DatabaseInitializer.addData(AppDatabase.getAppDatabase(ctx),"CellTower",object.toString(),CommonFunctions.fetchDateInUTC());
     }
 
@@ -190,23 +193,22 @@ public class Functions
         createExactTimer();
     }
 
-
     private void createExactTimer(){
         ScheduledExecutorService scheduleTaskExecutor= Executors.newScheduledThreadPool(5);
 
         // This schedule a task to run every 1 minutes:
         scheduleTaskExecutor.scheduleAtFixedRate(new Runnable() {
             public void run() {
-                if(Preference.getInstance(ctx) != null){
-                    String strength = "";
-                    String simType = Preference.getInstance(ctx).getCellTower();
-                    if(Preference.getInstance(ctx).getCellTowerStrength() != null){
-                        strength = Preference.getInstance(ctx).getCellTowerStrength();
-                    }
-                    Log.i(ForegroundService.LOG_TAG,"Tower Strength..."+strength);
-                    if(!ForegroundService.isAlarmReportSent){
-                        createJsonTower(simType,strength);
-                    }
+                if(ForegroundService.screenOnOffStatus && !ForegroundService.isReportSending){
+                    if(Preference.getInstance(ctx) != null){
+                        String strength = "";
+                        String simType = Preference.getInstance(ctx).getCellTower();
+                        if(Preference.getInstance(ctx).getCellTowerStrength() != null){
+                            strength = Preference.getInstance(ctx).getCellTowerStrength();
+                        }
+                        Log.i(ForegroundService.LOG_TAG,"Tower Strength..."+strength);
+                            createJsonTower(simType,strength);
+                        }
                 }
             }
         }, 1, 1, TimeUnit.MINUTES);
@@ -217,11 +219,14 @@ public class Functions
         // 1. Memory usage
         // 2. battery
 
+        Functions functions = new Functions(ctx);
+        JsonObject objectLoc = functions.fetchLocation();
+        Log.i(ForegroundService.LOG_TAG, "Location is..."+objectLoc.toString());
+        DatabaseInitializer.addData(AppDatabase.getAppDatabase(ctx),"LocationInfo",objectLoc.toString(), CommonFunctions.fetchDateInUTC());
+
         long totalRamValue = CommonFunctions.totalRamMemorySize(ctx);
         long freeRamValue = CommonFunctions.freeRamMemorySize(ctx);
         long usedRamValue = totalRamValue - freeRamValue;
-        //Log.i(TAG,"RAM USAGE:\n "+"TOTAL: "+CommonFunctions.formatSize(totalRamValue)+"'\nFREE: "+CommonFunctions.formatSize(freeRamValue)
-                //+"\nUSED: "+CommonFunctions.formatSize(usedRamValue));
 
         JsonObject object = new JsonObject();
         object.addProperty("Total",CommonFunctions.formatSize(totalRamValue));
@@ -233,8 +238,6 @@ public class Functions
         long totalInternalValue = CommonFunctions.getTotalInternalMemorySize();
         long freeInternalValue = CommonFunctions.getAvailableInternalMemorySize();
         long usedInternalValue = totalInternalValue - freeInternalValue;
-        //Log.i(TAG,"INTERNAL USAGE:\n "+"TOTAL: "+CommonFunctions.formatSize(totalInternalValue)+
-               // "\nFREE: "+CommonFunctions.formatSize(freeInternalValue)+"\nUSED: "+CommonFunctions.formatSize(usedInternalValue));
 
         JsonObject objectInternal = new JsonObject();
         objectInternal.addProperty("Total",CommonFunctions.formatSize(totalInternalValue));
@@ -243,18 +246,25 @@ public class Functions
         objectInternal.addProperty("Timestamp",CommonFunctions.fetchDateInUTC());
         DatabaseInitializer.addData(AppDatabase.getAppDatabase(ctx),"Internal",objectInternal.toString(),CommonFunctions.fetchDateInUTC());
 
-        long totalExternalValue = CommonFunctions.getTotalExternalMemorySize();
-        long freeExternalValue = CommonFunctions.getAvailableExternalMemorySize();
-        long usedExternalValue = totalExternalValue - freeExternalValue;
-        //Log.i(TAG,"EXTERNAL USAGE:\n "+"TOTAL: "+CommonFunctions.formatSize(totalExternalValue)+"'\nFREE: "+
-               // CommonFunctions.formatSize(freeExternalValue)+"\nUSED: "+CommonFunctions.formatSize(usedExternalValue));
+        if(CommonFunctions.externalMemoryAvailable()){
+            long totalExternalValue = CommonFunctions.getTotalExternalMemorySize();
+            long freeExternalValue = CommonFunctions.getAvailableExternalMemorySize();
+            long usedExternalValue = totalExternalValue - freeExternalValue;
 
-        JsonObject objectExternal = new JsonObject();
-        objectExternal.addProperty("Total",CommonFunctions.formatSize(totalExternalValue));
-        objectExternal.addProperty("Free",CommonFunctions.formatSize(freeExternalValue));
-        objectExternal.addProperty("Used",CommonFunctions.formatSize(usedExternalValue));
-        objectExternal.addProperty("Timestamp",CommonFunctions.fetchDateInUTC());
-        DatabaseInitializer.addData(AppDatabase.getAppDatabase(ctx),"External",objectExternal.toString(),CommonFunctions.fetchDateInUTC());
+            JsonObject objectExternal = new JsonObject();
+            objectExternal.addProperty("Total",CommonFunctions.formatSize(totalExternalValue));
+            objectExternal.addProperty("Free",CommonFunctions.formatSize(freeExternalValue));
+            objectExternal.addProperty("Used",CommonFunctions.formatSize(usedExternalValue));
+            objectExternal.addProperty("Timestamp",CommonFunctions.fetchDateInUTC());
+            DatabaseInitializer.addData(AppDatabase.getAppDatabase(ctx),"External",objectExternal.toString(),CommonFunctions.fetchDateInUTC());
+        }else{
+            JsonObject objectExternal = new JsonObject();
+            objectExternal.addProperty("Total","");
+            objectExternal.addProperty("Free","");
+            objectExternal.addProperty("Used","");
+            objectExternal.addProperty("Timestamp",CommonFunctions.fetchDateInUTC());
+            DatabaseInitializer.addData(AppDatabase.getAppDatabase(ctx),"External",objectExternal.toString(),CommonFunctions.fetchDateInUTC());
+        }
 
         CommonFunctions.getBatteryInfo(ctx);
         //Log.i(TAG,"Get CPU USAGE STATS: "+readUsage());

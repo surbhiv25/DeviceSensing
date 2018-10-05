@@ -53,6 +53,7 @@ public class Preference {
 
         public static final String UNIQUE_ID = "unique_id";
 
+        public static final String IS_HANDLER_CALLED = "is_handler_called";
         public static final String IS_REPORT_SENT = "is_report_sent";
     }
 
@@ -331,6 +332,10 @@ public class Preference {
 
     public String getUniqueID() {
         return getString(Key.UNIQUE_ID);
+    }
+
+    public Boolean getHandlerCalledStatus() {
+        return getBoolean(Key.IS_HANDLER_CALLED);
     }
 
     public Boolean getReportSentStatus() {

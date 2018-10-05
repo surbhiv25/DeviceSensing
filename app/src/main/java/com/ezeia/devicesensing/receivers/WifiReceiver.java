@@ -94,10 +94,10 @@ public class WifiReceiver extends BroadcastReceiver {
         jsonObject.addProperty("timestamp",CommonFunctions.fetchDateInUTC());
         jsonObject.add("connection",array);
 
-        Functions functions = new Functions(context);
+       /* Functions functions = new Functions(context);
         JsonObject objectLoc = functions.fetchLocation();
         jsonObject.add("location",objectLoc);
-        Log.i(ForegroundService.LOG_TAG, "Location is..."+objectLoc.toString());
+        Log.i(ForegroundService.LOG_TAG, "Location is..."+objectLoc.toString());*/
 
         if(object != null)
             DatabaseInitializer.addData(AppDatabase.getAppDatabase(context),"WifiConnection",object.toString(),CommonFunctions.fetchDateInUTC());
@@ -107,14 +107,14 @@ public class WifiReceiver extends BroadcastReceiver {
 
     private void createJson(){
 
-        Functions functions = new Functions(context);
+        /*Functions functions = new Functions(context);
         JsonObject objectLoc = functions.fetchLocation();
         Log.i(ForegroundService.LOG_TAG, "Location is..."+objectLoc.toString());
-
+*/
         JsonObject object = new JsonObject();
         object.addProperty("state","OFF");
         object.addProperty("timestamp",CommonFunctions.fetchDateInUTC());
-        object.add("location",objectLoc);
+        //object.add("location",objectLoc);
         DatabaseInitializer.addData(AppDatabase.getAppDatabase(context),"WifiConnection",object.toString(),CommonFunctions.fetchDateInUTC());
     }
 

@@ -24,10 +24,13 @@ public class JsonCreation {
 
     private void startCreatingJSON(Context ctx)
     {
-        Preference.getInstance(ctx).put(Preference.Key.IS_REPORT_SENT,true);
+        Preference.getInstance(ctx).put(Preference.Key.IS_HANDLER_CALLED,false);
+        Preference.getInstance(ctx).put(Preference.Key.IS_REPORT_SENT,false);
         Functions func = new Functions(ctx);
         func.collectedWithReport();
         func.collectedUponChange();
+        func.collectedUponUsage();
+        func.collectedWithActivity();
 
         if(Preference.getInstance(ctx) != null) {
             Boolean checkIfPluggedIn = Preference.getInstance(ctx).isFirstReportEmpty();
@@ -70,6 +73,7 @@ public class JsonCreation {
             JSONArray jsonObjectAirplane = DatabaseInitializer.fetchJsonArray(AppDatabase.getAppDatabase(ctx),"Airplane");
             JSONArray jsonObjCellTower = DatabaseInitializer.fetchJsonArray(AppDatabase.getAppDatabase(ctx),"CellTower");
             JSONArray jsonObjLocation = DatabaseInitializer.fetchJsonArray(AppDatabase.getAppDatabase(ctx),"Location");
+            JSONObject jsonObjLocationInfo = DatabaseInitializer.fetchJsonData(AppDatabase.getAppDatabase(ctx),"LocationInfo");
             JSONArray jsonObjBatteryPlug = DatabaseInitializer.fetchJsonArray(AppDatabase.getAppDatabase(ctx),"BatteryPlug");
             JSONArray jsonObjAccounts = DatabaseInitializer.fetchJsonArray(AppDatabase.getAppDatabase(ctx),"Accounts");
             //JSONArray jsonObjAudio = DatabaseInitializer.fetchJsonArray(AppDatabase.getAppDatabase(ctx),"AudioFiles");
@@ -78,6 +82,9 @@ public class JsonCreation {
             //JSONArray jsonObjCall = DatabaseInitializer.fetchJsonArray(AppDatabase.getAppDatabase(ctx),"CallLogs");
             //JSONArray jsonObjSms = DatabaseInitializer.fetchJsonArray(AppDatabase.getAppDatabase(ctx),"SMS");
             //JSONArray jsonObjContact = DatabaseInitializer.fetchJsonArray(AppDatabase.getAppDatabase(ctx),"Contacts");
+            JSONArray jsonObjServices = DatabaseInitializer.fetchSingleArray(AppDatabase.getAppDatabase(ctx),"ActiveServices");
+            JSONArray jsonObjUserApp = DatabaseInitializer.fetchJsonArray(AppDatabase.getAppDatabase(ctx),"UserInstalledApps");
+            JSONArray jsonObjSystemApp = DatabaseInitializer.fetchJsonArray(AppDatabase.getAppDatabase(ctx),"SystemApps");
             JSONObject jsonObjBattery = DatabaseInitializer.fetchJsonData(AppDatabase.getAppDatabase(ctx),"Battery");
             JSONObject jsonObjRAM = DatabaseInitializer.fetchJsonData(AppDatabase.getAppDatabase(ctx),"RAM");
             JSONObject jsonObjInternal = DatabaseInitializer.fetchJsonData(AppDatabase.getAppDatabase(ctx),"Internal");
@@ -96,6 +103,7 @@ public class JsonCreation {
             object.put("Airplane_Mode",jsonObjectAirplane);
             object.put("CellTower",jsonObjCellTower);
             object.put("Location",jsonObjLocation);
+            object.put("LocationInfo",jsonObjLocationInfo);
             object.put("Battery_Charging_State",jsonObjBatteryPlug);
             object.put("Accounts",jsonObjAccounts);
             //object.put("Audio_Files",jsonObjAudio);
@@ -104,6 +112,9 @@ public class JsonCreation {
             //object.put("Call_Logs",jsonObjCall);
             //object.put("SMS",jsonObjSms);
             //object.put("Contacts",jsonObjContact);
+            object.put("Active_Services",jsonObjServices);
+            object.put("UserInstalled_Apps",jsonObjUserApp);
+            object.put("System_Apps",jsonObjSystemApp);
             object.put("Battery",jsonObjBattery);
             object.put("RAM Storage",jsonObjRAM);
             object.put("Internal Storage",jsonObjInternal);
@@ -112,7 +123,7 @@ public class JsonCreation {
             //DatabaseInitializer.deleteProbe(AppDatabase.getAppDatabase(ctx),"FINAL_JSON");
 
             if(Preference.getInstance(ctx) != null){
-                if(Preference.getInstance(ctx).getReportSentStatus()){
+                if(!Preference.getInstance(ctx).getHandlerCalledStatus() || Preference.getInstance(ctx).getReportSentStatus()){
                     DatabaseInitializer.addDataWithFlag(AppDatabase.getAppDatabase(ctx), "FINAL_JSON",
                             object.toString(), CommonFunctions.fetchDateInUTC(), "0");
 
@@ -140,8 +151,12 @@ public class JsonCreation {
             JSONArray jsonObjectAirplane = DatabaseInitializer.fetchJsonArray(AppDatabase.getAppDatabase(ctx),"Airplane");
             JSONArray jsonObjCellTower = DatabaseInitializer.fetchJsonArray(AppDatabase.getAppDatabase(ctx),"CellTower");
             JSONArray jsonObjLocation = DatabaseInitializer.fetchJsonArray(AppDatabase.getAppDatabase(ctx),"Location");
+            JSONObject jsonObjLocationInfo = DatabaseInitializer.fetchJsonData(AppDatabase.getAppDatabase(ctx),"LocationInfo");
             JSONArray jsonObjBatteryPlug = DatabaseInitializer.fetchJsonArray(AppDatabase.getAppDatabase(ctx),"BatteryPlug");
             JSONArray jsonObjAccounts = DatabaseInitializer.fetchJsonArray(AppDatabase.getAppDatabase(ctx),"Accounts");
+            JSONArray jsonObjServices = DatabaseInitializer.fetchSingleArray(AppDatabase.getAppDatabase(ctx),"ActiveServices");
+            JSONArray jsonObjUserApp = DatabaseInitializer.fetchJsonArray(AppDatabase.getAppDatabase(ctx),"UserInstalledApps");
+            JSONArray jsonObjSystemApp = DatabaseInitializer.fetchJsonArray(AppDatabase.getAppDatabase(ctx),"SystemApps");
             JSONObject jsonObjBattery = DatabaseInitializer.fetchJsonData(AppDatabase.getAppDatabase(ctx),"Battery");
             JSONObject jsonObjRAM = DatabaseInitializer.fetchJsonData(AppDatabase.getAppDatabase(ctx),"RAM");
             JSONObject jsonObjInternal = DatabaseInitializer.fetchJsonData(AppDatabase.getAppDatabase(ctx),"Internal");
@@ -161,8 +176,12 @@ public class JsonCreation {
             object.put("Airplane_Mode",jsonObjectAirplane);
             object.put("CellTower",jsonObjCellTower);
             object.put("Location",jsonObjLocation);
+            object.put("LocationInfo",jsonObjLocationInfo);
             object.put("Battery_Charging_State",jsonObjBatteryPlug);
             object.put("Accounts",jsonObjAccounts);
+            object.put("Active_Services",jsonObjServices);
+            object.put("UserInstalled_Apps",jsonObjUserApp);
+            object.put("System_Apps",jsonObjSystemApp);
             object.put("Battery",jsonObjBattery);
             object.put("RAM Storage",jsonObjRAM);
             object.put("Internal Storage",jsonObjInternal);
@@ -171,7 +190,7 @@ public class JsonCreation {
             //DatabaseInitializer.deleteProbe(AppDatabase.getAppDatabase(ctx),"FINAL_JSON");
 
             if(Preference.getInstance(ctx) != null){
-                if(Preference.getInstance(ctx).getReportSentStatus()){
+                if(!Preference.getInstance(ctx).getHandlerCalledStatus() || Preference.getInstance(ctx).getReportSentStatus()){
                     DatabaseInitializer.addDataWithFlag(AppDatabase.getAppDatabase(ctx), "FINAL_JSON",
                             object.toString(), CommonFunctions.fetchDateInUTC(), "0");
 

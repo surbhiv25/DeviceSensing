@@ -21,6 +21,7 @@ import com.ezeia.devicesensing.service.ForegroundService;
 import com.ezeia.devicesensing.utils.CellTower.CellTowerStateListener;
 import com.ezeia.devicesensing.utils.NetworkConnection;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -141,7 +142,7 @@ public class AwsUploader implements NetworkConnection.ResultListener,KinesisUplo
                 try {
                     firehoseRecorder.saveRecord(newLineAdd, kinesisStreamName);
                     isSaved = true;
-                    ForegroundService.isAlarmReportSent = false;
+                    ForegroundService.isReportSending = false;
                     Log.i(ForegroundService.LOG_TAG,"SUCCESSFULLY SAVING....");
                     Answers.getInstance().logCustom(new CustomEvent("Data Saving")
                             .putCustomAttribute("Exception","Saved"));
@@ -164,16 +165,33 @@ public class AwsUploader implements NetworkConnection.ResultListener,KinesisUplo
                 }
 
                 if (isSaved) {
-                    DatabaseInitializer.deleteAllData(AppDatabase.getAppDatabase(ctx));
-                    Preference.getInstance(ctx).remove(Preference.Key.SCREEN_ON_TIME, Preference.Key.SCREEN_OFF_TIME,
-                            Preference.Key.BATTERY_PLUGGED, Preference.Key.START_TIME, Preference.Key.CLOSE_TIME,
-                            Preference.Key.PACKAGE_NAME, Preference.Key.IS_DEVICE_INFO, Preference.Key.ACC_X,
-                            Preference.Key.ACC_Y, Preference.Key.ACC_Z, Preference.Key.ACCURACY, Preference.Key.CELL_TOWER_SIM,
-                            Preference.Key.CELL_TOWER_VAL, Preference.Key.LOC_LATITUDE, Preference.Key.LOC_LONGITUDE,
-                            Preference.Key.LOC_ALTITUDE, Preference.Key.LOC_ACCURACY, Preference.Key.LOC_SPEED,
-                            Preference.Key.LOC_BEARING, Preference.Key.LOC_HAS_ALTITUDE, Preference.Key.LOC_HAS_ACCURACY,
-                            Preference.Key.LOC_HAS_BEARING, Preference.Key.LOC_HAS_SPEED, Preference.Key.LOC_MOCK_PROVIDER,
-                            Preference.Key.LOC_PROVIDER, Preference.Key.LOC_ELAPSED_TIME);
+                    JSONArray jsonObjectUsage = DatabaseInitializer.fetchJsonArray(AppDatabase.getAppDatabase(ctx),"AppUsage");
+                    if(jsonObjectUsage != null && jsonObjectUsage.length() < 1){
+                        Log.i(ForegroundService.LOG_TAG,"APP USAGE WAS BLANK");
+                        DatabaseInitializer.deleteAllData(AppDatabase.getAppDatabase(ctx));
+                        Preference.getInstance(ctx).remove(Preference.Key.SCREEN_ON_TIME, Preference.Key.SCREEN_OFF_TIME,
+                                Preference.Key.BATTERY_PLUGGED, Preference.Key.CLOSE_TIME,
+                                Preference.Key.IS_DEVICE_INFO, Preference.Key.ACC_X,
+                                Preference.Key.ACC_Y, Preference.Key.ACC_Z, Preference.Key.ACCURACY, Preference.Key.CELL_TOWER_SIM,
+                                Preference.Key.CELL_TOWER_VAL, Preference.Key.LOC_LATITUDE, Preference.Key.LOC_LONGITUDE,
+                                Preference.Key.LOC_ALTITUDE, Preference.Key.LOC_ACCURACY, Preference.Key.LOC_SPEED,
+                                Preference.Key.LOC_BEARING, Preference.Key.LOC_HAS_ALTITUDE, Preference.Key.LOC_HAS_ACCURACY,
+                                Preference.Key.LOC_HAS_BEARING, Preference.Key.LOC_HAS_SPEED, Preference.Key.LOC_MOCK_PROVIDER,
+                                Preference.Key.LOC_PROVIDER, Preference.Key.LOC_ELAPSED_TIME);
+
+                    }else{
+                        Log.i(ForegroundService.LOG_TAG,"APP USAGE HAD DATA");
+                        DatabaseInitializer.deleteAllData(AppDatabase.getAppDatabase(ctx));
+                        Preference.getInstance(ctx).remove(Preference.Key.SCREEN_ON_TIME, Preference.Key.SCREEN_OFF_TIME,
+                                Preference.Key.BATTERY_PLUGGED, Preference.Key.START_TIME, Preference.Key.CLOSE_TIME,
+                                Preference.Key.PACKAGE_NAME, Preference.Key.IS_DEVICE_INFO, Preference.Key.ACC_X,
+                                Preference.Key.ACC_Y, Preference.Key.ACC_Z, Preference.Key.ACCURACY, Preference.Key.CELL_TOWER_SIM,
+                                Preference.Key.CELL_TOWER_VAL, Preference.Key.LOC_LATITUDE, Preference.Key.LOC_LONGITUDE,
+                                Preference.Key.LOC_ALTITUDE, Preference.Key.LOC_ACCURACY, Preference.Key.LOC_SPEED,
+                                Preference.Key.LOC_BEARING, Preference.Key.LOC_HAS_ALTITUDE, Preference.Key.LOC_HAS_ACCURACY,
+                                Preference.Key.LOC_HAS_BEARING, Preference.Key.LOC_HAS_SPEED, Preference.Key.LOC_MOCK_PROVIDER,
+                                Preference.Key.LOC_PROVIDER, Preference.Key.LOC_ELAPSED_TIME);
+                    }
 
                     KinesisUploadTest task = new KinesisUploadTest(firehoseRecorder,this);
                     task.execute();
@@ -194,6 +212,9 @@ public class AwsUploader implements NetworkConnection.ResultListener,KinesisUplo
 
     @Override
     public void isSuccessfullySubmitted(Boolean aVoid) {
+        if(Preference.getInstance(ctx) != null){
+            Preference.getInstance(ctx).put(Preference.Key.IS_REPORT_SENT,true);
+        }
         TelephonyManager mTelephonyManager = (TelephonyManager) ctx.getSystemService(TELEPHONY_SERVICE);
         if(mTelephonyManager != null)
             mTelephonyManager.listen(new CellTowerStateListener(ctx), PhoneStateListener.LISTEN_SIGNAL_STRENGTHS);

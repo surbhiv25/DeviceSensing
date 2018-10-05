@@ -27,17 +27,18 @@ public class InstallAppReceiver extends BroadcastReceiver {
             String packageName = "";
             if(intent.getData() != null)
                 packageName = intent.getData().getSchemeSpecificPart();
-            //Log.i(ForegroundService.LOG_TAG,"INSTALL APPLICATION PACKAGE: "+ packageName);
-            //Log.i(ForegroundService.LOG_TAG,"INSTALL APPLICATION: "+ CommonFunctions.fetchDateInUTC());
             Toast.makeText(context,"Install App "+packageName, Toast.LENGTH_SHORT).show();
 
-            Functions functions = new Functions(context);
-            JsonObject objectLoc = functions.fetchLocation();
             JsonObject object = new JsonObject();
             object.addProperty("packageName",packageName);
             object.addProperty("timestamp",CommonFunctions.fetchDateInUTC());
+
+            /*
+            Functions functions = new Functions(context);
+            JsonObject objectLoc = functions.fetchLocation();
             object.add("location",objectLoc);
-            Log.i(ForegroundService.LOG_TAG, "Location is..."+objectLoc.toString());
+            Log.i(ForegroundService.LOG_TAG, "Location is..."+objectLoc.toString());*/
+
             DatabaseInitializer.addData(AppDatabase.getAppDatabase(context),"Install",object.toString(),CommonFunctions.fetchDateInUTC());
         }
     }

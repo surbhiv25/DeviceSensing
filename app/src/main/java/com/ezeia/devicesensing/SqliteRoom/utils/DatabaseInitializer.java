@@ -121,6 +121,17 @@ public class DatabaseInitializer {
         return header;
     }
 
+    public static org.json.JSONArray fetchSingleArray(AppDatabase db, String probeName) throws JSONException {
+
+        String userList = db.userDao().findSingleDataByName(probeName);
+        JSONArray object = null;
+        if(userList != null){
+            object = new JSONArray(userList);
+            Log.i(ForegroundService.LOG_TAG, "FETCHED DATA..." +"PROBE NAME: "+probeName+"\nPROBE INFO: "+object);
+        }
+        return object;
+    }
+
     public static org.json.JSONObject fetchJsonData(AppDatabase db, String probeName) throws JSONException {
 
         JSONObject object;

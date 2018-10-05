@@ -96,10 +96,10 @@ public class PowerReceiver extends BroadcastReceiver {
         object.addProperty("state",pluggedState);
         object.addProperty("timestamp",CommonFunctions.fetchDateInUTC());
 
-        Functions functions = new Functions(ctx);
+       /* Functions functions = new Functions(ctx);
         JsonObject objectLoc = functions.fetchLocation();
         object.add("location",objectLoc);
-        Log.i(ForegroundService.LOG_TAG, "Location is..."+objectLoc.toString());
+        Log.i(ForegroundService.LOG_TAG, "Location is..."+objectLoc.toString());*/
         DatabaseInitializer.addData(AppDatabase.getAppDatabase(ctx),"BatteryPlug",object.toString(),CommonFunctions.fetchDateInUTC());
     }
 

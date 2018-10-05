@@ -21,6 +21,7 @@ import io.fabric.sdk.android.Fabric;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 import static android.Manifest.permission.READ_CALL_LOG;
 import static android.Manifest.permission.READ_CONTACTS;
+import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.READ_PHONE_STATE;
 import static android.Manifest.permission.READ_SMS;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
@@ -67,18 +68,17 @@ public class MainActivity extends AppCompatActivity {
         int resultPhoneState = ContextCompat.checkSelfPermission(getApplicationContext(), READ_PHONE_STATE);
         int resultLoc = ContextCompat.checkSelfPermission(getApplicationContext(), ACCESS_FINE_LOCATION);
         int resultStorage = ContextCompat.checkSelfPermission(getApplicationContext(), WRITE_EXTERNAL_STORAGE);
-        //int resultCamera = ContextCompat.checkSelfPermission(getApplicationContext(), CAMERA);
+        int resultRead = ContextCompat.checkSelfPermission(getApplicationContext(), READ_EXTERNAL_STORAGE);
 
         return resultSms == PackageManager.PERMISSION_GRANTED && resultCall == PackageManager.PERMISSION_GRANTED
                 && resultContact == PackageManager.PERMISSION_GRANTED && resultPhoneState == PackageManager.PERMISSION_GRANTED
-                &&  resultLoc == PackageManager.PERMISSION_GRANTED && resultStorage == PackageManager.PERMISSION_GRANTED;
+                &&  resultLoc == PackageManager.PERMISSION_GRANTED && resultStorage == PackageManager.PERMISSION_GRANTED
+                && resultRead == PackageManager.PERMISSION_GRANTED;
     }
 
     private void requestPermissionExtra() {
-
         ActivityCompat.requestPermissions(this, new String[]{READ_SMS,READ_CALL_LOG,READ_CONTACTS,
-                READ_PHONE_STATE,ACCESS_FINE_LOCATION, WRITE_EXTERNAL_STORAGE}, PERMISSION_REQUEST_CODE);
-
+                READ_PHONE_STATE,ACCESS_FINE_LOCATION, WRITE_EXTERNAL_STORAGE, READ_EXTERNAL_STORAGE}, PERMISSION_REQUEST_CODE);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -94,10 +94,10 @@ public class MainActivity extends AppCompatActivity {
                     boolean phoneAccepted = grantResults[3] == PackageManager.PERMISSION_GRANTED;
                     boolean locationAccepted = grantResults[4] == PackageManager.PERMISSION_GRANTED;
                     boolean storageAccepted = grantResults[5] == PackageManager.PERMISSION_GRANTED;
-                    //boolean cameraAccepted = grantResults[6] == PackageManager.PERMISSION_GRANTED;
+                    boolean readAccepted = grantResults[6] == PackageManager.PERMISSION_GRANTED;
 
                     if (smsAccepted && callLogAccepted && contactsAccepted && phoneAccepted
-                            && locationAccepted && storageAccepted ) {
+                            && locationAccepted && storageAccepted && readAccepted ) {
                         //if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 
                         //}
@@ -122,7 +122,8 @@ public class MainActivity extends AppCompatActivity {
                                             @Override
                                             public void onClick(DialogInterface dialog, int which) {
                                                 requestPermissions(new String[]{READ_SMS,READ_CALL_LOG,READ_CONTACTS,
-                                                                READ_PHONE_STATE,ACCESS_FINE_LOCATION, WRITE_EXTERNAL_STORAGE}, PERMISSION_REQUEST_CODE);
+                                                                READ_PHONE_STATE,ACCESS_FINE_LOCATION, WRITE_EXTERNAL_STORAGE,
+                                                                READ_EXTERNAL_STORAGE}, PERMISSION_REQUEST_CODE);
                                             }
                                         });
                                 return;

@@ -30,14 +30,14 @@ public class UninstallAppReceiver extends BroadcastReceiver {
                 //Log.i(ForegroundService.LOG_TAG,"UNINSTALL APPLICATION: "+ CommonFunctions.fetchDateInUTC());
                 Toast.makeText(context,"Uninstall App", Toast.LENGTH_SHORT).show();
 
-                Functions functions = new Functions(context);
+                /*Functions functions = new Functions(context);
                 JsonObject objectLoc = functions.fetchLocation();
                 Log.i(ForegroundService.LOG_TAG, "Location is..."+objectLoc.toString());
-
+*/
                 JsonObject object = new JsonObject();
                 object.addProperty("packageName",packageName);
                 object.addProperty("timestamp",CommonFunctions.fetchDateInUTC());
-                object.add("location",objectLoc);
+                //object.add("location",objectLoc);
                 DatabaseInitializer.addData(AppDatabase.getAppDatabase(context),"Uninstall",object.toString(),CommonFunctions.fetchDateInUTC());
             }
         }

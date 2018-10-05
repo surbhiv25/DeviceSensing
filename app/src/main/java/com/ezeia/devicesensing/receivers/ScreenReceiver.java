@@ -45,6 +45,7 @@ public class ScreenReceiver extends BroadcastReceiver{
 
             if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
                 Toast.makeText(context, "Screen OFF", Toast.LENGTH_SHORT).show();
+                ForegroundService.screenOnOffStatus = false;
                 Preference.getInstance(context).put(Preference.Key.SCREEN_OFF_TIME,CommonFunctions.fetchDateInUTC());
                 cancelCurrentAlarm(context);
 
@@ -53,15 +54,15 @@ public class ScreenReceiver extends BroadcastReceiver{
                         if(!isCallActive(ctx) && !isMusicPlaying(ctx)){
                             Log.i(ForegroundService.LOG_TAG,"TIME AFTER 30 SECONDS..."+CommonFunctions.fetchDateInUTC());
                             if(Preference.getInstance(ctx) != null){
-                                if(!Preference.getInstance(ctx).getReportSentStatus()){
-                                    //startCreatingJSON(ctx);
-                                    //new JsonCreation(ctx);
+                                if(!Preference.getInstance(ctx).getHandlerCalledStatus() || Preference.getInstance(ctx).getReportSentStatus()){
+                                    ForegroundService.isReportSending = true;
+                                    new JsonCreation(ctx);
+                                    Log.i(ForegroundService.LOG_TAG,"COMING HERE TO SEND DATA....");
                                 }
                             }
-                        }
-                        else if(isCallActive(ctx)){
+                        } else if(isCallActive(ctx)){
                             Log.i(ForegroundService.LOG_TAG,"CALL ACTIVE IN 30 SECONDS..."+CommonFunctions.fetchDateInUTC());
-                        }else if(isMusicPlaying(ctx)){
+                        } else if(isMusicPlaying(ctx)){
                             Log.i(ForegroundService.LOG_TAG,"MUSIC ACTIVE IN 30 SECONDS..."+CommonFunctions.fetchDateInUTC());
                         }
                     }
@@ -69,14 +70,13 @@ public class ScreenReceiver extends BroadcastReceiver{
 
                 Log.i(ForegroundService.LOG_TAG,"SCREEN OFF: "+ CommonFunctions.fetchDateInUTC());
             } else if (intent.getAction().equals(Intent.ACTION_SCREEN_ON)) {
+
                 Toast.makeText(context, "Screen ON", Toast.LENGTH_SHORT).show();
-                Preference.getInstance(ctx).put(Preference.Key.IS_REPORT_SENT,false);
+                ForegroundService.screenOnOffStatus = true;
+                Preference.getInstance(ctx).put(Preference.Key.IS_HANDLER_CALLED,true);
                 Preference.getInstance(context).put(Preference.Key.SCREEN_ON_TIME,CommonFunctions.fetchDateInUTC());
                 Log.i(ForegroundService.LOG_TAG,"SCREEN ON: "+ CommonFunctions.fetchDateInUTC());
 
-                if(handler != null){
-                    handler.removeMessages(0);
-                }
                 setAlarmAgain(context);
             }
         }
@@ -118,10 +118,10 @@ public class ScreenReceiver extends BroadcastReceiver{
         Calendar c = Calendar.getInstance();
         c.add(Calendar.MINUTE, 5);
         long afterTwoMinutes = c.getTimeInMillis();
-        long interval = 60 * 1000 * 5; // 1 minute
-
+        long interval = 60 * 1000 * 5; // 5 minute
 
         alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, afterTwoMinutes, interval,pendingIntent);
+        Toast.makeText(ctx, "Alarm is set", Toast.LENGTH_SHORT).show();
     }
 
 }

@@ -4,7 +4,6 @@ import android.content.Context;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
-
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.CognitoCachingCredentialsProvider;
@@ -20,23 +19,17 @@ import com.ezeia.devicesensing.pref.Preference;
 import com.ezeia.devicesensing.service.ForegroundService;
 import com.ezeia.devicesensing.utils.CellTower.CellTowerStateListener;
 import com.ezeia.devicesensing.utils.NetworkConnection;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.File;
-import java.util.List;
-
 import io.fabric.sdk.android.Fabric;
-
 import static android.content.Context.TELEPHONY_SERVICE;
 
 public class AwsUploader implements NetworkConnection.ResultListener,KinesisUploadTest.SubmmittedListener {
 
     private final Context ctx;
     private KinesisFirehoseRecorder firehoseRecorder;
-    private String uniqueID = "";
 
     public AwsUploader(Context ctx) {
 
@@ -64,7 +57,7 @@ public class AwsUploader implements NetworkConnection.ResultListener,KinesisUplo
     /**
      * Submit a record to Kinesis Stream
      */
-    public void submitKinesisRecord() {
+    /*public void submitKinesisRecord() {
         String kinesisStreamName = ctx.getString(R.string.kinesis_stream_name);
 
         JSONObject finalObject;
@@ -97,7 +90,7 @@ public class AwsUploader implements NetworkConnection.ResultListener,KinesisUplo
         } catch (JSONException e) {
             e.printStackTrace();
         }
-    }
+    }*/
 
     //will not be called for now
     @Override
@@ -105,7 +98,7 @@ public class AwsUploader implements NetworkConnection.ResultListener,KinesisUplo
 
         if(aVoid){
             if(Preference.getInstance(ctx) != null){
-                uniqueID = Preference.getInstance(ctx).getUniqueID();
+                Preference.getInstance(ctx).getUniqueID();
             }
             KinesisUploadTest task = new KinesisUploadTest(firehoseRecorder,this);
             task.execute();

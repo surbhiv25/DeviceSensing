@@ -2,30 +2,21 @@ package com.ezeia.devicesensing.utils;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.os.Handler;
 import android.provider.MediaStore;
-import android.telephony.PhoneStateListener;
-import android.telephony.TelephonyManager;
 import android.util.Log;
 import com.ezeia.devicesensing.SqliteRoom.Database.AppDatabase;
 import com.ezeia.devicesensing.SqliteRoom.utils.DatabaseInitializer;
 import com.ezeia.devicesensing.pref.Preference;
 import com.ezeia.devicesensing.receivers.LocationReceiver;
 import com.ezeia.devicesensing.service.ForegroundService;
-import com.ezeia.devicesensing.utils.CellTower.CellTowerStateListener;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
-
-import static android.content.Context.TELEPHONY_SERVICE;
-import static com.ezeia.devicesensing.service.ForegroundService.isReportSending;
 
 public class Functions
 {
@@ -96,7 +87,7 @@ public class Functions
         CommonFunctions.getSystemInstalledApps(ctx);
     }
 
-    public JsonObject fetchLocation(){
+    private JsonObject fetchLocation(){
 
         String latitude = "0.0",longitude = "0.0",altitude = "0.0",accuracy = "0.0",
                 speed = "0",bearing = "0",elapsedTime = "0",provider = "null";

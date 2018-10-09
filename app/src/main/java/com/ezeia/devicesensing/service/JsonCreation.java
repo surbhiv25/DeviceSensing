@@ -125,7 +125,7 @@ public class JsonCreation {
             if(Preference.getInstance(ctx) != null){
                 if(!Preference.getInstance(ctx).getHandlerCalledStatus() || Preference.getInstance(ctx).getReportSentStatus()){
                     DatabaseInitializer.addDataWithFlag(AppDatabase.getAppDatabase(ctx), "FINAL_JSON",
-                            object.toString(), CommonFunctions.fetchDateInUTC(), "0");
+                            object.toString(), CommonFunctions.fetchDateInUTC());
 
                     AwsUploader uploader = new AwsUploader(ctx);
                     uploader.submitKinesisRecordTest();
@@ -192,7 +192,7 @@ public class JsonCreation {
             if(Preference.getInstance(ctx) != null){
                 if(!Preference.getInstance(ctx).getHandlerCalledStatus() || Preference.getInstance(ctx).getReportSentStatus()){
                     DatabaseInitializer.addDataWithFlag(AppDatabase.getAppDatabase(ctx), "FINAL_JSON",
-                            object.toString(), CommonFunctions.fetchDateInUTC(), "0");
+                            object.toString(), CommonFunctions.fetchDateInUTC());
 
                     AwsUploader uploader = new AwsUploader(ctx);
                     uploader.submitKinesisRecordTest();

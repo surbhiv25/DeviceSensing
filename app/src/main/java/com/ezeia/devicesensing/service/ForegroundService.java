@@ -20,9 +20,7 @@ import android.hardware.SensorManager;
 import android.location.LocationManager;
 import android.net.wifi.WifiManager;
 import android.os.Build;
-import android.os.Environment;
 import android.os.IBinder;
-import android.os.StatFs;
 import android.support.v4.app.NotificationCompat;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
@@ -52,22 +50,10 @@ import com.ezeia.devicesensing.utils.Functions;
 import com.ezeia.devicesensing.utils.Location.FetchLocation;
 import com.google.gson.JsonObject;
 import com.rvalerio.fgchecker.AppChecker;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.RandomAccessFile;
-import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import io.fabric.sdk.android.Fabric;
 
 public class ForegroundService extends Service implements SensorEventListener {
@@ -103,68 +89,17 @@ public class ForegroundService extends Service implements SensorEventListener {
 
         if(Preference.getInstance(ctx) != null){
             Preference.getInstance(ctx).put(Preference.Key.IS_REPORT_SENT,false);
-            //Preference.getInstance(ctx).put(Preference.Key.IS_HANDLER_CALLED,false);
         }
         Functions functions = new Functions(this);
         //functions.primaryKeyData();
         //functions.collectedUponUsage();
         functions.collectCellTowerData();
 
-        new FetchLocation(this);
-        //new MyWorkManager(this);
-
+        new FetchLocation(this); //to connect to GoogleClient when the app is first started
         setAlarm();
 
     }
 
-    public String getTotalRAM() {
-
-        RandomAccessFile reader = null;
-        String load = null;
-        DecimalFormat twoDecimalForm = new DecimalFormat("#.##");
-        double totRam = 0;
-        String lastValue = "";
-        try {
-            reader = new RandomAccessFile("/proc/meminfo", "r");
-            load = reader.readLine();
-
-            // Get the Number value from the string
-            Pattern p = Pattern.compile("(\\d+)");
-            Matcher m = p.matcher(load);
-            String value = "";
-            while (m.find()) {
-                value = m.group(1);
-                // System.out.println("Ram : " + value);
-            }
-            reader.close();
-
-            totRam = Double.parseDouble(value);
-            // totRam = totRam / 1024;
-
-            double mb = totRam / 1024.0;
-            double gb = totRam / 1048576.0;
-            double tb = totRam / 1073741824.0;
-
-            if (tb > 1) {
-                lastValue = twoDecimalForm.format(tb).concat(" TB");
-            } else if (gb > 1) {
-                lastValue = twoDecimalForm.format(gb).concat(" GB");
-            } else if (mb > 1) {
-                lastValue = twoDecimalForm.format(mb).concat(" MB");
-            } else {
-                lastValue = twoDecimalForm.format(totRam).concat(" KB");
-            }
-
-
-
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        } finally {
-            // Streams.close(reader);
-        }
-
-        return lastValue;
-    }
 
     private void setAlarm() {
         //getting the alarm manager
@@ -179,11 +114,13 @@ public class ForegroundService extends Service implements SensorEventListener {
         Calendar c = Calendar.getInstance();
         c.add(Calendar.MINUTE, 5);
         long afterTwoMinutes = c.getTimeInMillis();
-        long interval = 60 * 1000 * 5; // 1 minute
+        long interval = 60 * 1000 * 5; // 5 minute
 
         //setting the repeating alarm that will be fired every day
-        am.setRepeating(AlarmManager.RTC_WAKEUP, afterTwoMinutes,interval, pi);
-        Toast.makeText(this, "Alarm is set", Toast.LENGTH_SHORT).show();
+        if(am != null){
+            am.setRepeating(AlarmManager.RTC_WAKEUP, afterTwoMinutes,interval, pi);
+            Toast.makeText(this, "Alarm is set", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void createNotificationService(){
@@ -308,20 +245,6 @@ public class ForegroundService extends Service implements SensorEventListener {
         createExactTimer();
     }
 
-   /* @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-    private boolean hasPermission() {
-        AppOpsManager appOps = (AppOpsManager)
-                getSystemService(Context.APP_OPS_SERVICE);
-        int mode = 0;
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-            if (appOps != null) {
-                mode = appOps.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS,
-                        android.os.Process.myUid(), getPackageName());
-            }
-        }
-        return mode == AppOpsManager.MODE_ALLOWED;
-    }*/
-
     @Override
     public int onStartCommand(Intent intent, int flags, int startId)
     {
@@ -388,12 +311,6 @@ public class ForegroundService extends Service implements SensorEventListener {
         .start(this);
     }
 
-    private String getCurrentTime() {
-        Calendar calendar = Calendar.getInstance();
-        SimpleDateFormat mdformat = new SimpleDateFormat("HH:mm:ss", Locale.ENGLISH);
-        return mdformat.format(calendar.getTime());
-    }
-
     private void stopChecker() {
         appChecker.stop();
     }
@@ -402,8 +319,7 @@ public class ForegroundService extends Service implements SensorEventListener {
     {
        /* Functions functions = new Functions(ctx);
         JsonObject objectLoc = functions.fetchLocation();
-        Log.i(ForegroundService.LOG_TAG, "Location is..."+objectLoc.toString());
-*/
+        Log.i(ForegroundService.LOG_TAG, "Location is..."+objectLoc.toString());*/
         JsonObject subItems = new JsonObject();
         subItems.addProperty("package_Name",packgeName);
         subItems.addProperty("start_Time",startTime);
@@ -444,7 +360,7 @@ public class ForegroundService extends Service implements SensorEventListener {
             float y = sensorEvent.values[1];
             float z = sensorEvent.values[2];
             Integer accAccuracy = sensorEvent.accuracy;
-            Long accTimestamp = sensorEvent.timestamp;
+            //Long accTimestamp = sensorEvent.timestamp;
 
             if(isIntervalDone){
                 if(Preference.getInstance(this) != null)
@@ -496,44 +412,4 @@ public class ForegroundService extends Service implements SensorEventListener {
         }, 1, 1, TimeUnit.MINUTES);
     }
 
-    public String totalMemory()
-    {
-        StatFs statFs = new StatFs(Environment.getRootDirectory().getAbsolutePath());
-        long   total  = (statFs.getBlockCount() * statFs.getBlockSize());
-        Log.i("TAGGGG",bytesToHuman(total));
-        return bytesToHuman(total);
-    }
-
-    public String freeMemory()
-    {
-        StatFs statFs = new StatFs(Environment.getRootDirectory().getAbsolutePath());
-        long   free   = (statFs.getAvailableBlocks() * statFs.getBlockSize());
-        Log.i("TAGGGG",bytesToHuman(free));
-        return bytesToHuman(free);
-    }
-
-    private static String bytesToHuman(long size)
-    {
-        long Kb = 1  * 1024;
-        long Mb = Kb * 1024;
-        long Gb = Mb * 1024;
-        long Tb = Gb * 1024;
-        long Pb = Tb * 1024;
-        long Eb = Pb * 1024;
-
-        if (size <  Kb)                 return floatForm(        size     ) + " byte";
-        if (size >= Kb && size < Mb)    return floatForm((double)size / Kb) + " Kb";
-        if (size >= Mb && size < Gb)    return floatForm((double)size / Mb) + " Mb";
-        if (size >= Gb && size < Tb)    return floatForm((double)size / Gb) + " Gb";
-        if (size >= Tb && size < Pb)    return floatForm((double)size / Tb) + " Tb";
-        if (size >= Pb && size < Eb)    return floatForm((double)size / Pb) + " Pb";
-        if (size >= Eb)                 return floatForm((double)size / Eb) + " Eb";
-
-        return "???";
-    }
-
-    private static String floatForm(double d)
-    {
-        return new DecimalFormat("#.##").format(d);
-    }
 }

@@ -1,8 +1,6 @@
 package com.ezeia.devicesensing.service.awstask;
 
 import android.os.AsyncTask;
-import android.telephony.PhoneStateListener;
-import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import com.amazonaws.AmazonClientException;
@@ -10,16 +8,13 @@ import com.amazonaws.mobileconnectors.kinesis.kinesisrecorder.KinesisFirehoseRec
 import com.crashlytics.android.answers.Answers;
 import com.crashlytics.android.answers.CustomEvent;
 import com.ezeia.devicesensing.service.ForegroundService;
-import com.ezeia.devicesensing.utils.CellTower.CellTowerStateListener;
-
-import static android.content.Context.TELEPHONY_SERVICE;
 
 class KinesisUploadTest extends AsyncTask<Void,Void,Boolean>{
 
     private final KinesisFirehoseRecorder recorder;
     private final AwsUploader uploader;
 
-    public KinesisUploadTest(KinesisFirehoseRecorder firehoseRecorder,AwsUploader uploader) {
+    KinesisUploadTest(KinesisFirehoseRecorder firehoseRecorder,AwsUploader uploader) {
         this.recorder = firehoseRecorder;
         this.uploader = uploader;
     }

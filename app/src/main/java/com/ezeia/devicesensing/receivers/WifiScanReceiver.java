@@ -21,13 +21,14 @@ public class WifiScanReceiver extends BroadcastReceiver {
     {
         //StringBuffer buffer = null;
         this.context = context;
-        if (intent.getAction().equals(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)) {
-            if(!Preference.getInstance(context).getWifiScanInfo()){
-               // buffer = getWifiName();
-                Preference.getInstance(context).put(Preference.Key.IS_WIFI_SCANNED,true);
+        if(intent != null && intent.getAction() != null){
+            if (intent.getAction().equals(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)) {
+                if(!Preference.getInstance(context).getWifiScanInfo()){
+                    // buffer = getWifiName();
+                    Preference.getInstance(context).put(Preference.Key.IS_WIFI_SCANNED,true);
+                }
             }
         }
-
         //Log.i(ForegroundService.LOG_TAG,"AVAILABLE NETWORKS: "+buffer);
         //Toast.makeText(context,"wifi scanning", Toast.LENGTH_SHORT).show();
     }
@@ -36,7 +37,8 @@ public class WifiScanReceiver extends BroadcastReceiver {
     private StringBuffer getWifiName() {
         WifiManager manager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         StringBuffer bufferWifi =  new StringBuffer();
-        if (manager.isWifiEnabled() ) {
+        if(manager != null){
+            if (manager.isWifiEnabled() ) {
                 List<ScanResult> scans = manager.getScanResults();
                 if(scans != null && !scans.isEmpty()){
                     int counter = 0;
@@ -57,11 +59,12 @@ public class WifiScanReceiver extends BroadcastReceiver {
                                 .append("\nTIMESTAMP: ").append(timeStamp)
                                 .append("\n\n");
                     }
+                }
             }
-        }
-        else
-        {
-            bufferWifi.append("WIFI not enabled");
+            else
+            {
+                bufferWifi.append("WIFI not enabled");
+            }
         }
         return bufferWifi;
     }

@@ -25,11 +25,13 @@ public class LeakCanaryApp extends Application {
 
     private static void enabledStrictMode() {
         if(BuildConfig.DEBUG){
-            StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder() //
-                    .detectAll() //
-                    .penaltyLog() //
-                    .penaltyDeath() //
-                    .build());
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O){
+                StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder() //
+                        .detectAll() //
+                        .penaltyLog() //
+                        .penaltyDeath() //
+                        .build());
+            }
         }
     }
 }

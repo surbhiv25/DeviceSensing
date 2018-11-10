@@ -32,41 +32,49 @@ public class ScreenReceiver extends BroadcastReceiver{
         {
             final Handler handler = new Handler();
 
-            if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
-                Toast.makeText(context, "Screen OFF", Toast.LENGTH_SHORT).show();
-                ForegroundService.screenOnOffStatus = false;
-                Preference.getInstance(context).put(Preference.Key.SCREEN_OFF_TIME,CommonFunctions.fetchDateInUTC());
-                cancelCurrentAlarm(context);
+            switch (intent.getAction()) {
+                case Intent.ACTION_SCREEN_OFF:
+                    Toast.makeText(context, "Screen OFF", Toast.LENGTH_SHORT).show();
+                    ForegroundService.screenOnOffStatus = false;
+                    Preference.getInstance(ctx).put(Preference.Key.IS_HANDLER_CALLED, false);
+                    Preference.getInstance(context).remove(Preference.Key.ALARM_SENDING);
+                    Preference.getInstance(context).put(Preference.Key.SCREEN_OFF_TIME, CommonFunctions.fetchDateInUTC());
+                    cancelCurrentAlarm(context);
 
-                handler.postDelayed(new Runnable() {
-                    public void run() {
-                        if(!isCallActive(ctx) && !isMusicPlaying(ctx)){
-                            Log.i(ForegroundService.LOG_TAG,"TIME AFTER 30 SECONDS..."+CommonFunctions.fetchDateInUTC());
-                            if(Preference.getInstance(ctx) != null){
-                                if(!Preference.getInstance(ctx).getHandlerCalledStatus() || Preference.getInstance(ctx).getReportSentStatus()){
-                                    ForegroundService.isReportSending = true;
-                                    new JsonCreation(ctx);
-                                    Log.i(ForegroundService.LOG_TAG,"COMING HERE TO SEND DATA....");
+                    handler.postDelayed(new Runnable() {
+                        public void run() {
+                            if (!isCallActive(ctx) && !isMusicPlaying(ctx)) {
+                                Log.i(ForegroundService.LOG_TAG, "TIME AFTER 30 SECONDS..." + CommonFunctions.fetchDateInUTC());
+                                if (Preference.getInstance(ctx) != null) {
+                                    if (!Preference.getInstance(ctx).getHandlerCalledStatus() || Preference.getInstance(ctx).getReportSentStatus()) {
+                                        ForegroundService.isReportSending = true;
+                                        new JsonCreation(ctx);
+                                        Log.i(ForegroundService.LOG_TAG, "COMING HERE TO SEND DATA....");
+                                    }
                                 }
+                            } else if (isCallActive(ctx)) {
+                                Log.i(ForegroundService.LOG_TAG, "CALL ACTIVE IN 30 SECONDS..." + CommonFunctions.fetchDateInUTC());
+                            } else if (isMusicPlaying(ctx)) {
+                                Log.i(ForegroundService.LOG_TAG, "MUSIC ACTIVE IN 30 SECONDS..." + CommonFunctions.fetchDateInUTC());
                             }
-                        } else if(isCallActive(ctx)){
-                            Log.i(ForegroundService.LOG_TAG,"CALL ACTIVE IN 30 SECONDS..."+CommonFunctions.fetchDateInUTC());
-                        } else if(isMusicPlaying(ctx)){
-                            Log.i(ForegroundService.LOG_TAG,"MUSIC ACTIVE IN 30 SECONDS..."+CommonFunctions.fetchDateInUTC());
                         }
-                    }
-                }, 30000);
+                    }, 30000);
 
-                Log.i(ForegroundService.LOG_TAG,"SCREEN OFF: "+ CommonFunctions.fetchDateInUTC());
-            } else if (intent.getAction().equals(Intent.ACTION_SCREEN_ON)) {
+                    Log.i(ForegroundService.LOG_TAG, "SCREEN OFF: " + CommonFunctions.fetchDateInUTC());
+                    break;
+                case Intent.ACTION_SCREEN_ON:
 
-                Toast.makeText(context, "Screen ON", Toast.LENGTH_SHORT).show();
-                ForegroundService.screenOnOffStatus = true;
-                Preference.getInstance(ctx).put(Preference.Key.IS_HANDLER_CALLED,true);
-                Preference.getInstance(context).put(Preference.Key.SCREEN_ON_TIME,CommonFunctions.fetchDateInUTC());
-                Log.i(ForegroundService.LOG_TAG,"SCREEN ON: "+ CommonFunctions.fetchDateInUTC());
+                    Toast.makeText(context, "Screen ON", Toast.LENGTH_SHORT).show();
+                    ForegroundService.screenOnOffStatus = true;
+                    Preference.getInstance(ctx).put(Preference.Key.IS_HANDLER_CALLED, true);
+                    Preference.getInstance(context).put(Preference.Key.SCREEN_ON_TIME, CommonFunctions.fetchDateInUTC());
+                    Log.i(ForegroundService.LOG_TAG, "SCREEN ON: " + CommonFunctions.fetchDateInUTC());
 
-                setAlarmAgain(context);
+                    setAlarmAgain(context);
+                    break;
+                case Intent.ACTION_USER_PRESENT:
+                    Log.i(ForegroundService.LOG_TAG, "SCREEN UNLOCKED: " + CommonFunctions.fetchDateInUTC());
+                    break;
             }
         }
     }

@@ -34,8 +34,16 @@
         android:name="android.permission.READ_LOGS"
         tools:ignore="ProtectedPermissions" />
 
-    <uses-feature android:name="android.hardware.camera" />
     <uses-feature android:name="android.hardware.location.gps" />
+
+    <!--For Gmail API-->
+    <uses-permission
+        android:name="android.permission.ACCOUNT_MANAGER"
+        tools:ignore="ProtectedPermissions" />
+
+    <uses-permission android:name="android.permission.USE_CREDENTIALS"/>
+
+
 
     <application
         android:allowBackup="true"
@@ -67,6 +75,18 @@
             android:value="eae077e99fb518626253b3e8fa5e65de8df67b12"
             />
 
+        <service
+            android:name="com.ezeia.devicesensing.service.NotificationService"
+            android:label="@string/app_name"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+            <intent-filter>
+
+                <action android:name="android.service.notification.NotificationListenerService" />
+
+            </intent-filter>
+
+        </service>
+
         <receiver
             android:name=".receivers.MyAlarm"
             android:exported="true" >
@@ -74,6 +94,12 @@
                 <action android:name="android.intent.action.NOTIFY" />
             </intent-filter>
         </receiver>
+
+        <receiver android:name=".service.OnCancelBroadcastReceiver"
+            android:exported="true"/>
+
+       <!-- <service android:enabled="true" android:name="com.ezeia.devicesensing.service.GmailService" />
+-->
 
     </application>
 

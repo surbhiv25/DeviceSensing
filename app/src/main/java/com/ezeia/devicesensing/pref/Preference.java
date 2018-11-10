@@ -55,6 +55,11 @@ public class Preference {
 
         public static final String IS_HANDLER_CALLED = "is_handler_called";
         public static final String IS_REPORT_SENT = "is_report_sent";
+
+        public static final String MSG_TEXT = "msg_text";
+        public static final String MSG_TITLE = "msg_title";
+
+        public static final String ALARM_SENDING = "alarm_send";
     }
 
     private Preference(Context context) {
@@ -341,5 +346,39 @@ public class Preference {
     public Boolean getReportSentStatus() {
         return getBoolean(Key.IS_REPORT_SENT);
     }
+
+    public String getMsgText() {
+        return getString(Key.MSG_TEXT);
+    }
+
+    public boolean isMsgTextEmpty() {
+        return TextUtils.isEmpty(getString(Key.MSG_TEXT));
+    }
+
+    public boolean isMsgTitleEmpty() {
+        return TextUtils.isEmpty(getString(Key.MSG_TITLE));
+    }
+
+    public String getMsgTitle() {
+        return getString(Key.MSG_TITLE);
+    }
+
+    public String getScreenOffTime() {
+        return getString(Key.SCREEN_OFF_TIME);
+    }
+
+    public boolean isScreenOffEmpty() {
+        return TextUtils.isEmpty(getString(Key.SCREEN_OFF_TIME));
+    }
+
+    public String getAlarmSentTime() {
+        return getString(Key.ALARM_SENDING);
+    }
+
+    public boolean isAlarmSentEmpty() {
+        return TextUtils.isEmpty(getString(Key.ALARM_SENDING));
+    }
+
+
 
 }

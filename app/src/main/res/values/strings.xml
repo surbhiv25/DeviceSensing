@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">AgniDeviceSensing</string>
+    <string name="app_name">DataGets</string>
 
     <string name="service_running">SERVICE RUNNING</string>
     <string name="allowPermission">You need to allow access to all the permissions</string>

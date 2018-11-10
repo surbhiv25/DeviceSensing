@@ -7,16 +7,19 @@ import android.content.Context;
 
 import com.crashlytics.android.Crashlytics;
 import com.ezeia.devicesensing.SqliteRoom.Dao.DataFetchDao;
+import com.ezeia.devicesensing.SqliteRoom.Dao.GmailDataDao;
 import com.ezeia.devicesensing.SqliteRoom.entity.DataFetch;
+import com.ezeia.devicesensing.SqliteRoom.entity.GmailData;
 
 import io.fabric.sdk.android.Fabric;
 
-@Database(entities = {DataFetch.class}, version = 1, exportSchema = false)
+@Database(entities = {DataFetch.class, GmailData.class}, version = 1, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
 
     private static AppDatabase INSTANCE;
 
     public abstract DataFetchDao userDao();
+    public abstract GmailDataDao gmailDataDao();
 
     public static AppDatabase getAppDatabase(Context context) {
         Fabric.with(context, new Crashlytics());
@@ -26,7 +29,7 @@ public abstract class AppDatabase extends RoomDatabase {
                             // allow queries on the main thread.
                             // Don't do this on a real app! See PersistenceBasicSample for an example.
                             .allowMainThreadQueries()
-                            //.addMigrations(FROM_1_TO_2)
+                            //.addMigrations(MIGRATION_1_2)
                             .build();
         }
         return INSTANCE;

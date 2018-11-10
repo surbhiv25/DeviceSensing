@@ -176,6 +176,7 @@ public class ForegroundService extends Service implements SensorEventListener {
 
         IntentFilter filterScreen = new IntentFilter(Intent.ACTION_SCREEN_ON);
         filterScreen.addAction(Intent.ACTION_SCREEN_OFF);
+        filterScreen.addAction(Intent.ACTION_USER_PRESENT);
         screenReceiver = new ScreenReceiver();
         registerReceiver(screenReceiver, filterScreen);
 

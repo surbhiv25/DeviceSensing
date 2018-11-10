@@ -3,7 +3,10 @@ package com.ezeia.devicesensing.SqliteRoom.utils;
 import android.util.Log;
 import com.ezeia.devicesensing.SqliteRoom.Database.AppDatabase;
 import com.ezeia.devicesensing.SqliteRoom.entity.DataFetch;
+import com.ezeia.devicesensing.SqliteRoom.entity.GmailData;
 import com.ezeia.devicesensing.service.ForegroundService;
+import com.google.api.services.gmail.Gmail;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -16,17 +19,13 @@ public class DatabaseInitializer {
         db.userDao().insertAll(user);
     }
 
-   /* public static void deleteProbe(final AppDatabase db, String probeName) {
-        db.userDao().deleteByName(probeName);
-    }*/
+    private static void addGmailUser(final AppDatabase db, GmailData user) {
+        db.gmailDataDao().insertAll(user);
+    }
 
     public static void deleteAllData(final AppDatabase db) {
         db.userDao().delete();
     }
-
-  /*  public static void updateFlag(final AppDatabase db,String submitFlg,String uniqueID) {
-        db.userDao().update(submitFlg,"FINAL_JSON",uniqueID);
-    }*/
 
     public static void addData(AppDatabase db, String probeName, String probeInfo, String timeStamp) {
         DataFetch user = new DataFetch();
@@ -101,4 +100,28 @@ public class DatabaseInitializer {
         return db.userDao().findFinalDataByName("FINAL_JSON");
     }
 
+    //Gmail Data
+    public static void addGmailData(AppDatabase db, String fromMail, String toMail, String date, String category,
+                               String snippet, String msgID, String subject, String mailThreadID) {
+        GmailData user = new GmailData();
+        user.setFrom(fromMail);
+        user.setTo(toMail);
+        user.setDate(date);
+        user.setCategory(category);
+        user.setSnippet(snippet);
+        user.setMsgID(msgID);
+        user.setSubject(subject);
+        user.setMailThreadID(mailThreadID);
+        addGmailUser(db, user);
+    }
+
+    public static List<GmailData> fetchGmailData(AppDatabase db) {
+
+        return db.gmailDataDao().getAll(10);
+    }
+
+    public static void deleteByLimit(AppDatabase db) {
+
+        db.gmailDataDao().deleteByLimit(10);
+    }
 }

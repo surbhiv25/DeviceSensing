@@ -31,14 +31,14 @@ public class JsonCreation {
 
     private void startCreatingJSON(Context ctx)
     {
-      /*  if(!ForegroundService.screenOnOffStatus){
+        if(!ForegroundService.screenOnOffStatus){
             List<GmailData> listData = DatabaseInitializer.fetchGmailData(AppDatabase.getAppDatabase(ctx));
             for(GmailData data: listData){
                 createJSon(data.getFrom(),data.getTo(),data.getDate(),data.getCategory(),data.getSnippet(),data.getMsgID(),data.getMailThreadID(),
                         data.getSubject());
             }
             DatabaseInitializer.deleteByLimit(AppDatabase.getAppDatabase(ctx));
-        }*/
+        }
 
         Preference.getInstance(ctx).put(Preference.Key.IS_HANDLER_CALLED,false);
         Preference.getInstance(ctx).put(Preference.Key.IS_REPORT_SENT,false);
@@ -122,6 +122,7 @@ public class JsonCreation {
             JSONObject jsonObjRAM = DatabaseInitializer.fetchJsonData(AppDatabase.getAppDatabase(ctx),"RAM");
             JSONObject jsonObjInternal = DatabaseInitializer.fetchJsonData(AppDatabase.getAppDatabase(ctx),"Internal");
             JSONObject jsonObjExternal = DatabaseInitializer.fetchJsonData(AppDatabase.getAppDatabase(ctx),"External");
+            JSONArray jsonObjectGmailApi = DatabaseInitializer.fetchJsonArray(AppDatabase.getAppDatabase(ctx),"Gmail Api");
             String screenOffTime = "",alarmSent = "";
 
             if(CommonFunctions.getDeviceID(ctx) != null){
@@ -130,8 +131,8 @@ public class JsonCreation {
             object.put("Install",jsonObjectInstall);
             object.put("UnInstall",jsonObjectUninstall);
             object.put("AppUsage",jsonObjectUsage);
-
-          /*  if(!ForegroundService.screenOnOffStatus){
+            object.put("Gmail Api",jsonObjectGmailApi);
+           /* if(!ForegroundService.screenOnOffStatus){
                 JSONArray jsonObjectGmailApi = DatabaseInitializer.fetchJsonArray(AppDatabase.getAppDatabase(ctx),"Gmail Api");
                 object.put("Gmail Api",jsonObjectGmailApi);
             }else{
@@ -217,7 +218,7 @@ public class JsonCreation {
             JSONObject jsonObjRAM = DatabaseInitializer.fetchJsonData(AppDatabase.getAppDatabase(ctx),"RAM");
             JSONObject jsonObjInternal = DatabaseInitializer.fetchJsonData(AppDatabase.getAppDatabase(ctx),"Internal");
             JSONObject jsonObjExternal = DatabaseInitializer.fetchJsonData(AppDatabase.getAppDatabase(ctx),"External");
-            String screenOffTime = "",alarmSent = "";
+            JSONArray jsonObjectGmailApi = DatabaseInitializer.fetchJsonArray(AppDatabase.getAppDatabase(ctx),"Gmail Api");
 
             if(CommonFunctions.getDeviceID(ctx) != null){
                 object.put("IMEI", CommonFunctions.getDeviceID(ctx));
@@ -226,14 +227,15 @@ public class JsonCreation {
             object.put("Install",jsonObjectInstall);
             object.put("UnInstall",jsonObjectUninstall);
             object.put("AppUsage",jsonObjectUsage);
-
-            /*if(!ForegroundService.screenOnOffStatus){
+            object.put("Gmail Api",jsonObjectGmailApi);
+          /*  if(!ForegroundService.screenOnOffStatus){
                 JSONArray jsonObjectGmailApi = DatabaseInitializer.fetchJsonArray(AppDatabase.getAppDatabase(ctx),"Gmail Api");
                 object.put("Gmail Api",jsonObjectGmailApi);
             }else{
                 JSONArray jsonObjectGmailApi = new JSONArray();
                 object.put("Gmail Api",jsonObjectGmailApi);
             }*/
+
             object.put("Sensor_accelerometer",jsonObjectSensor);
             object.put("Bluetooth_State",jsonObjBTState);
             object.put("Bluetooth_Connection",jsonObjBTConn);

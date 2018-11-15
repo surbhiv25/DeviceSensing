@@ -30,8 +30,10 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import java.io.File;
 import java.text.DecimalFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -408,6 +410,45 @@ public class CommonFunctions {
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd",Locale.ENGLISH);
         Date date = new Date();
         return df.format(date);
+    }
+
+    public static String fetchDateGmail() {
+        SimpleDateFormat df = new SimpleDateFormat("yyyy/MM/dd",Locale.ENGLISH);
+        Date date = new Date();
+        return df.format(date);
+    }
+
+    public static String fetchDayDateTime() {
+        SimpleDateFormat df = new SimpleDateFormat("dd MM yyyy HH:mm:ss",Locale.ENGLISH);
+        Date date = new Date();
+        return df.format(date);
+    }
+
+    public static Boolean dateCompare(String dateOne, String dateTwo){
+        Boolean check = false;
+        try{
+            SimpleDateFormat formatter = new SimpleDateFormat("dd MMM yyyy HH:mm:ss",Locale.ENGLISH);
+            Date date1 = formatter.parse(dateOne);
+            Date date2 = formatter.parse(dateTwo);
+
+            if (date2.after(date1))
+            {
+                check = true;
+            }
+        }catch (ParseException e1){
+            e1.printStackTrace();
+        }
+        return check;
+    }
+
+    public static String fetchTomorrowDateGmail() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_YEAR, 1);
+        Date tomorrow = calendar.getTime();
+        SimpleDateFormat df = new SimpleDateFormat("yyyy/MM/dd",Locale.ENGLISH);
+       /* Date date = new Date();
+        df.format(date);*/
+        return df.format(tomorrow);
     }
 
     public static void getContactList(Context ctx)

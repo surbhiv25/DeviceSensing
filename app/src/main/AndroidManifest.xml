@@ -98,8 +98,7 @@
         <receiver android:name=".service.OnCancelBroadcastReceiver"
             android:exported="true"/>
 
-       <!-- <service android:enabled="true" android:name="com.ezeia.devicesensing.service.GmailService" />
--->
+        <service android:enabled="true" android:name="com.ezeia.devicesensing.service.GmailService" />
 
     </application>
 

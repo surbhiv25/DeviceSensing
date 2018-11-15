@@ -70,8 +70,8 @@ public class MainActivity extends AppCompatActivity {
                 requestNotifictnAccess();
             }else{
 
-               // googleAccessAuthorise();
-                if (!checkRuntimePermission()) {
+                googleAccessAuthorise();
+               /* if (!checkRuntimePermission()) {
                     requestRuntimePermission();
                 } else {
                     Intent startIntent = new Intent(MainActivity.this, ForegroundService.class);
@@ -83,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
                         startService(startIntent);
                         finish();
                     }
-                }
+                }*/
             }
         }else{
             requestAppUsagePermission();

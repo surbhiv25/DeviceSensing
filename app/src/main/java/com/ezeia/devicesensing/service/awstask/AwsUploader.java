@@ -1,6 +1,8 @@
 package com.ezeia.devicesensing.service.awstask;
 
+import android.accounts.AccountManager;
 import android.content.Context;
+import android.content.Intent;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
@@ -12,11 +14,14 @@ import com.amazonaws.regions.Regions;
 import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.answers.Answers;
 import com.crashlytics.android.answers.CustomEvent;
+import com.ezeia.devicesensing.MainActivity;
 import com.ezeia.devicesensing.R;
 import com.ezeia.devicesensing.SqliteRoom.Database.AppDatabase;
 import com.ezeia.devicesensing.SqliteRoom.utils.DatabaseInitializer;
+import com.ezeia.devicesensing.pref.AuthPreferences;
 import com.ezeia.devicesensing.pref.Preference;
 import com.ezeia.devicesensing.service.ForegroundService;
+import com.ezeia.devicesensing.service.GmailService;
 import com.ezeia.devicesensing.utils.CellTower.CellTowerStateListener;
 import com.ezeia.devicesensing.utils.NetworkConnection;
 import org.json.JSONArray;
@@ -211,5 +216,10 @@ public class AwsUploader implements NetworkConnection.ResultListener,KinesisUplo
         TelephonyManager mTelephonyManager = (TelephonyManager) ctx.getSystemService(TELEPHONY_SERVICE);
         if(mTelephonyManager != null)
             mTelephonyManager.listen(new CellTowerStateListener(ctx), PhoneStateListener.LISTEN_SIGNAL_STRENGTHS);
+
+        Intent cbIntent =  new Intent();
+        cbIntent.putExtra("comingFrom","Report");
+        cbIntent.setClass(ctx, GmailService.class);
+        ctx.startService(cbIntent);
     }
 }

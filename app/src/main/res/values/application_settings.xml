@@ -3,8 +3,8 @@
     <string name="cognito_identity_pool_id">us-east-2:f53d11e8-393c-40d9-9dd7-c0efe7acba3b</string>
     <string name="region">us-east-2</string>
 
-    <!--<string name="kinesis_stream_name">agni_mobile_dev</string>-->
-    <string name="kinesis_stream_name">agni_mobile_qa</string>
+    <string name="kinesis_stream_name">agni_mobile_dev</string>
+   <!-- <string name="kinesis_stream_name">agni_mobile_qa</string>-->
 
     <!--<string name="firehose_stream_name">firehose-stream-1</string>-->
 

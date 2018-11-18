@@ -105,20 +105,27 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private boolean checkRuntimePermission() {
-        int resultSms = ContextCompat.checkSelfPermission(getApplicationContext(), READ_SMS);
-        int resultCall = ContextCompat.checkSelfPermission(getApplicationContext(), READ_CALL_LOG);
+        //commented because not yet getting included in reports -- 18 nov,2018
+        /*int resultSms = ContextCompat.checkSelfPermission(getApplicationContext(), READ_SMS);
+        int resultCall = ContextCompat.checkSelfPermission(getApplicationContext(), READ_CALL_LOG);*/
+
+        //add these lines when uncommented
+        //resultSms == PackageManager.PERMISSION_GRANTED && resultCall == PackageManager.PERMISSION_GRANTED &&
+
         int resultContact = ContextCompat.checkSelfPermission(getApplicationContext(), READ_CONTACTS);
         int resultPhoneState = ContextCompat.checkSelfPermission(getApplicationContext(), READ_PHONE_STATE);
         int resultLoc = ContextCompat.checkSelfPermission(getApplicationContext(), ACCESS_FINE_LOCATION);
         int resultStorage = ContextCompat.checkSelfPermission(getApplicationContext(), WRITE_EXTERNAL_STORAGE);
 
-        return resultSms == PackageManager.PERMISSION_GRANTED && resultCall == PackageManager.PERMISSION_GRANTED
-                && resultContact == PackageManager.PERMISSION_GRANTED && resultPhoneState == PackageManager.PERMISSION_GRANTED
+        return  resultContact == PackageManager.PERMISSION_GRANTED && resultPhoneState == PackageManager.PERMISSION_GRANTED
                 &&  resultLoc == PackageManager.PERMISSION_GRANTED && resultStorage == PackageManager.PERMISSION_GRANTED;
     }
 
     private void requestRuntimePermission() {
-        ActivityCompat.requestPermissions(this, new String[]{READ_SMS,READ_CALL_LOG,READ_CONTACTS,
+        //add these lines when uncommented
+        //{READ_SMS,READ_CALL_LOG,
+
+        ActivityCompat.requestPermissions(this, new String[]{READ_CONTACTS,
                 READ_PHONE_STATE,ACCESS_FINE_LOCATION, WRITE_EXTERNAL_STORAGE}, PERMISSION_REQUEST_CODE);
     }
 
@@ -129,15 +136,17 @@ public class MainActivity extends AppCompatActivity {
             case 200 :
                 if (grantResults.length > 0) {
 
-                    boolean smsAccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
-                    boolean callLogAccepted = grantResults[1] == PackageManager.PERMISSION_GRANTED;
-                    boolean contactsAccepted = grantResults[2] == PackageManager.PERMISSION_GRANTED;
-                    boolean phoneAccepted = grantResults[3] == PackageManager.PERMISSION_GRANTED;
-                    boolean locationAccepted = grantResults[4] == PackageManager.PERMISSION_GRANTED;
-                    boolean storageAccepted = grantResults[5] == PackageManager.PERMISSION_GRANTED;
+                    //add these lines when uncommented and change array size
+                    /*boolean smsAccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
+                    boolean callLogAccepted = grantResults[1] == PackageManager.PERMISSION_GRANTED;*/
+                    boolean contactsAccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
+                    boolean phoneAccepted = grantResults[1] == PackageManager.PERMISSION_GRANTED;
+                    boolean locationAccepted = grantResults[2] == PackageManager.PERMISSION_GRANTED;
+                    boolean storageAccepted = grantResults[3] == PackageManager.PERMISSION_GRANTED;
 
-                    if (smsAccepted && callLogAccepted && contactsAccepted && phoneAccepted
-                            && locationAccepted && storageAccepted ) {
+                    //add these lines when uncommented
+                    //smsAccepted && callLogAccepted &&
+                    if (contactsAccepted && phoneAccepted && locationAccepted && storageAccepted ) {
                         Intent startIntent = new Intent(MainActivity.this, ForegroundService.class);
                         startIntent.setAction(Constants.ACTION.STARTFOREGROUND_ACTION);
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
@@ -158,7 +167,9 @@ public class MainActivity extends AppCompatActivity {
                                             @TargetApi(Build.VERSION_CODES.M)
                                             @Override
                                             public void onClick(DialogInterface dialog, int which) {
-                                                requestPermissions(new String[]{READ_SMS,READ_CALL_LOG,READ_CONTACTS,
+                                                //add these lines when uncommented
+                                                //READ_SMS,READ_CALL_LOG,
+                                                requestPermissions(new String[]{READ_CONTACTS,
                                                                 READ_PHONE_STATE,ACCESS_FINE_LOCATION, WRITE_EXTERNAL_STORAGE,},
                                                         PERMISSION_REQUEST_CODE);
                                             }

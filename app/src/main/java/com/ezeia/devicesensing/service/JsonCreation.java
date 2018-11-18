@@ -164,6 +164,7 @@ public class JsonCreation {
             object.put("RAM Storage",jsonObjRAM);
             object.put("Internal Storage",jsonObjInternal);
             object.put("External Storage",jsonObjExternal);
+            object.put("Mail_Optin","true");
           /*  if(Preference.getInstance(ctx) != null){
                 if(Preference.getInstance(ctx).isScreenOffEmpty()){
                     alarmSent = Preference.getInstance(ctx).getAlarmSentTime();
@@ -254,6 +255,7 @@ public class JsonCreation {
             object.put("RAM Storage",jsonObjRAM);
             object.put("Internal Storage",jsonObjInternal);
             object.put("External Storage",jsonObjExternal);
+            object.put("Mail_Optin","true");
 
            /* if(Preference.getInstance(ctx) != null){
                 if(Preference.getInstance(ctx).isScreenOffEmpty()){

@@ -1,5 +1,6 @@
 package com.ezeia.devicesensing.utils.Location;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -9,6 +10,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.FragmentActivity;
 import android.widget.Toast;
 
 import com.ezeia.devicesensing.pref.Preference;
@@ -21,9 +23,8 @@ import com.google.android.gms.location.LocationServices;
 public class FetchLocation implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
-    private final GoogleApiClient mGoogleApiClient;
+    private GoogleApiClient mGoogleApiClient = null;
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
-
     private Location mLocation;
     private final Context ctx;
     private double latitude;
@@ -34,6 +35,7 @@ public class FetchLocation implements GoogleApiClient.ConnectionCallbacks,
         this.ctx = ctx;
 
         mGoogleApiClient = new GoogleApiClient.Builder(ctx)
+                //.enableAutoManage(activity,0,this)
                 .addApi(LocationServices.API)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)

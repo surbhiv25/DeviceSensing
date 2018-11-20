@@ -326,7 +326,7 @@ public class ForegroundService extends Service implements SensorEventListener {
         subItems.addProperty("start_Time",startTime);
         subItems.addProperty("close_Time",closeTime);
         //subItems.add("location",objectLoc);
-        //Log.i("APP USAGE",subItems.toString());
+        Log.i("APP USAGE",subItems.toString());
         DatabaseInitializer.addData(AppDatabase.getAppDatabase(ctx),"AppUsage",subItems.toString(), CommonFunctions.fetchDateInUTC());
     }
 

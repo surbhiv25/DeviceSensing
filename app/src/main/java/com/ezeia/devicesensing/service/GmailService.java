@@ -11,6 +11,7 @@ import android.util.Log;
 import com.ezeia.devicesensing.SqliteRoom.Database.AppDatabase;
 import com.ezeia.devicesensing.SqliteRoom.utils.DatabaseInitializer;
 import com.ezeia.devicesensing.pref.AuthPreferences;
+import com.ezeia.devicesensing.pref.Preference;
 import com.ezeia.devicesensing.utils.CommonFunctions;
 import com.google.android.gms.auth.GoogleAuthException;
 import com.google.android.gms.auth.GoogleAuthUtil;
@@ -90,7 +91,14 @@ public class GmailService extends IntentService {
             ArrayList<String> ids = new ArrayList<>();
             ids.add("INBOX");
 
-            if (TextUtils.isEmpty(comingFrom)) {
+            Boolean isDateChanged = false;
+            String getTodayDate = Preference.getInstance(this).getFirstReportDate();
+            String todayDate = CommonFunctions.fetchTodayDate();
+            if (todayDate != null && !getTodayDate.equals(todayDate)) {
+                isDateChanged = true;
+            }
+
+            if (TextUtils.isEmpty(comingFrom) || isDateChanged) {
                 StringBuilder builderNew = new StringBuilder();
                 builderNew.append("after:")
                         .append(CommonFunctions.fetchDateGmail())
@@ -103,57 +111,63 @@ public class GmailService extends IntentService {
                             .setLabelIds(ids)
                             .setQ(builderNew.toString())
                             .execute();
-                    m = messagesRespose.getMessages();
-                    Boolean isFirstMail = true, isFirstMailDate = true;
-                    for (com.google.api.services.gmail.model.Message message : m) {
-                        String msgID = message.getId();
-                        String mailThreadID = message.getThreadId();
-                        com.google.api.services.gmail.model.Message messageNew = service.users().messages().get(authPreferences.getUser(), msgID).execute();
+                    if(messagesRespose != null && messagesRespose.getMessages() != null){
+                        m = messagesRespose.getMessages();
+                        if(m != null){
+                            Boolean isFirstMail = true, isFirstMailDate = true;
+                            for (com.google.api.services.gmail.model.Message message : m) {
+                                String msgID = message.getId();
+                                String mailThreadID = message.getThreadId();
+                                com.google.api.services.gmail.model.Message messageNew = service.users().messages().get(authPreferences.getUser(), msgID).execute();
 
-                        List<String> list = messageNew.getLabelIds();
-                        StringBuilder builder = new StringBuilder();
-                        for (String labelName : list) {
-                            Log.i("TAG_LABEL", labelName);
-                            builder.append(labelName).append(",");
-                        }
-
-                        List<MessagePartHeader> headerList = messageNew.getPayload().getHeaders();
-
-                        String fromSender = "", subject = "", toReceiver = "", dateReceived = "";
-                        AuthPreferences authPreferences = new AuthPreferences(this);
-
-                        for (MessagePartHeader val : headerList) {
-                            if (val.getName().equals("From")) {
-                                fromSender = val.getValue();
-                                if (isFirstMail) {
-                                    isFirstMail = false;
-                                    authPreferences.setMailSender(fromSender);
+                                List<String> list = messageNew.getLabelIds();
+                                StringBuilder builder = new StringBuilder();
+                                for (String labelName : list) {
+                                    builder.append(labelName).append(",");
                                 }
-                            }
-                            if (val.getName().equals("Subject")) {
-                                subject = val.getValue();
-                            }
-                            if (val.getName().equals("To")) {
-                                toReceiver = val.getValue();
-                            }
-                            if (val.getName().equals("Date")) {
-                                if(val.getValue().contains(",")){
-                                    String splitDate = val.getValue().split(Pattern.quote(","))[1];
-                                    if(splitDate.contains("+")){
-                                        dateReceived = splitDate.substring(0,splitDate.indexOf("+")).trim();
+
+                                List<MessagePartHeader> headerList = messageNew.getPayload().getHeaders();
+
+                                String fromSender = "", subject = "", toReceiver = "", dateReceived = "";
+                                String dateForSaving = "";
+                                AuthPreferences authPreferences = new AuthPreferences(this);
+
+                                for (MessagePartHeader val : headerList) {
+                                    if (val.getName().equals("From")) {
+                                        fromSender = val.getValue();
+                                        if (isFirstMail) {
+                                            isFirstMail = false;
+                                            authPreferences.setMailSender(fromSender);
+                                        }
+                                    }
+                                    if (val.getName().equals("Subject")) {
+                                        subject = val.getValue();
+                                    }
+                                    if (val.getName().equals("To")) {
+                                        toReceiver = val.getValue();
+                                    }
+                                    if (val.getName().equals("Date")) {
+                                        if(val.getValue().contains(",")){
+                                            dateForSaving = val.getValue();
+                                            String splitDate = val.getValue().split(Pattern.quote(","))[1];
+                                            if(splitDate.contains("+")){
+                                                dateReceived = splitDate.substring(0,splitDate.indexOf("+")).trim();
+                                            }
+                                        }
+                                        if (isFirstMailDate) {
+                                            isFirstMailDate = false;
+                                            authPreferences.setMailDate(dateReceived);
+                                        }
                                     }
                                 }
-                                if (isFirstMailDate) {
-                                    isFirstMailDate = false;
-                                    authPreferences.setMailDate(dateReceived);
-                                }
+                                String messageSnippet = messageNew.getSnippet();
+                                DatabaseInitializer.addGmailData(AppDatabase.getAppDatabase(this), fromSender, toReceiver, dateForSaving,
+                                        builder.toString(), messageSnippet, msgID, subject, mailThreadID);
+                                Log.i("TAG_GMAIL", "Mail is from: " + fromSender + " and Date is: " + dateForSaving + " and subject is:" + subject);
                             }
                         }
-                        String messageSnippet = messageNew.getSnippet();
-                        DatabaseInitializer.addGmailData(AppDatabase.getAppDatabase(this), fromSender, toReceiver, dateReceived,
-                                builder.toString(), messageSnippet, msgID, subject, mailThreadID);
-                        Log.i("TAG_GMAIL", "Mail is from: " + fromSender + " and Date is: " + dateReceived + " and subject is:" + subject);
                     }
+
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -172,21 +186,17 @@ public class GmailService extends IntentService {
                         List<String> list = messageNew.getLabelIds();
                         StringBuilder builder = new StringBuilder();
                         for (String labelName : list) {
-                            Log.i("TAG_LABEL", labelName);
                             builder.append(labelName).append(",");
                         }
 
                         List<MessagePartHeader> headerList = messageNew.getPayload().getHeaders();
 
                         String fromSender = "", subject = "", toReceiver = "", dateReceived = "";
-                        String formattedDate = "", currentDate = "";
+                        String formattedDate = "", dateForSaving = "";
                         AuthPreferences authPreferences = new AuthPreferences(this);
 
                         //last saved date
                         formattedDate = authPreferences.getMailDate();
-
-                        currentDate = CommonFunctions.fetchDayDateTime();
-
                         for (MessagePartHeader val : headerList) {
                             if (val.getName().equals("From")) {
                                 fromSender = val.getValue();
@@ -203,6 +213,7 @@ public class GmailService extends IntentService {
                             }
                             if (val.getName().equals("Date")) {
                                 if(val.getValue().contains(",")){
+                                    dateForSaving = val.getValue();
                                     String splitDate = val.getValue().split(Pattern.quote(","))[1];
                                     if(splitDate.contains("+")){
                                         dateReceived = splitDate.substring(0,splitDate.indexOf("+")).trim();
@@ -218,9 +229,9 @@ public class GmailService extends IntentService {
                                     isFirstMailDate = false;
                                     authPreferences.setMailDate(dateReceived);
                                 }
-                                DatabaseInitializer.addGmailData(AppDatabase.getAppDatabase(this), fromSender, toReceiver, dateReceived,
+                                DatabaseInitializer.addGmailData(AppDatabase.getAppDatabase(this), fromSender, toReceiver, dateForSaving,
                                         builder.toString(), messageSnippet, msgID, subject, mailThreadID);
-                                Log.i("TAG_GMAIL", "Mail is from: " + fromSender + " and Date is: " + dateReceived + " and subject is:" + subject);
+                                //Log.i("TAG_GMAIL", "Mail is from: " + fromSender + " and Date is: " + dateReceived + " and subject is:" + subject);
                             }
                         }
                     }
@@ -228,8 +239,6 @@ public class GmailService extends IntentService {
                     e.printStackTrace();
                 }
             }
-
-
         } else {
             Log.i("TAG", "Token not fetched.");
         }
@@ -284,7 +293,6 @@ public class GmailService extends IntentService {
                     List<String> list = messageNew.getLabelIds();
                     StringBuilder builder = new StringBuilder();
                     for (String labelName : list) {
-                        Log.i("TAG_LABEL", labelName);
                         builder.append(labelName).append(",");
                     }
 
